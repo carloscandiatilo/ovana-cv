@@ -3,10 +3,10 @@
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\PermissionResource\Pages;
+use App\Filament\Resources\Base\Resource; 
 use Spatie\Permission\Models\Permission;
 use Filament\Forms;
 use Filament\Forms\Form;
-use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Filament\Tables\Columns\TextColumn;
@@ -14,7 +14,7 @@ use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Grid;
 
-class PermissionResource extends Resource
+class PermissionResource extends Resource // 👈
 {
     protected static ?string $model = Permission::class;
 
@@ -22,7 +22,7 @@ class PermissionResource extends Resource
 
     protected static ?string $navigationGroup = 'Permissões';
 
-        public static function getNavigationLabel(): string
+    public static function getNavigationLabel(): string
     {
         return __('Permissões');
     }
@@ -61,7 +61,6 @@ class PermissionResource extends Resource
                             ->dehydrated()
                             ->required()
                             ->columnSpanFull()
-                            ->helperText('Guard usado para autenticação. Geralmente "web" em aplicações padrão.'),
                     ])
                     ->compact(),
             ])
@@ -76,17 +75,7 @@ class PermissionResource extends Resource
                     ->label('Nome')
                     ->searchable()
                     ->sortable(),
-
-                TextColumn::make('guard_name')
-                    ->label('Guard')
-                    ->sortable()
-                    ->badge()
-                    ->color(fn (string $state): string => match ($state) {
-                        'web' => 'info',
-                        'api' => 'warning',
-                        default => 'gray',
-                    }),
-
+               
                 TextColumn::make('created_at')
                     ->label('Criado em')
                     ->dateTime('d/m/Y H:i')
@@ -109,8 +98,6 @@ class PermissionResource extends Resource
                     ->modalHeading('Excluir Permissão')
                     ->modalDescription('Tem certeza de que deseja excluir esta permissão? Esta ação não pode ser desfeita e pode afetar roles e usuários associados.')
                     ->requiresConfirmation(),
-            ])
-            ->headerActions([
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([

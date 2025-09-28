@@ -9,6 +9,7 @@ class DatabaseSeeder extends Seeder
 {
     /**
      * Seed the application's database.
+     * php artisan db:seed
      */
     public function run(): void
     {

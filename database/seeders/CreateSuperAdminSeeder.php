@@ -13,57 +13,55 @@ class CreateSuperAdminSeeder extends Seeder
 {
     public function run(): void
     {
-        // 1. Cria ou obtém a role "super_admin"
         $superAdminRole = Role::firstOrCreate(['name' => 'super_admin']);
 
-        // 2. Coleta todas as permissões do Filament (baseadas nos Resources)
         $permissions = [];
 
         foreach (Filament::getResources() as $resource) {
             $model = $resource::getModel();
-            $modelName = Str::snake(class_basename($model), '-');
+            $modelName = Str::snake(class_basename($model));
 
-            // Permissões CRUD padrão por recurso
-            $permissions[] = "view_{$modelName}";
-            $permissions[] = "view_any_{$modelName}";
-            $permissions[] = "create_{$modelName}";
-            $permissions[] = "update_{$modelName}";
-            $permissions[] = "delete_{$modelName}";
-            $permissions[] = "delete_any_{$modelName}";
-            $permissions[] = "restore_{$modelName}";
-            $permissions[] = "force_delete_{$modelName}";
+            $permissions = array_merge($permissions, [
+                "visualizar_{$modelName}",
+                "criar_{$modelName}",
+                "editar_{$modelName}",
+                "eliminar_{$modelName}",
+            ]);
         }
 
-        // 3. Adiciona permissões extras comuns (opcional)
-        $extraPermissions = [
-            'access_filament', // para proteger o painel
-            'manage_roles',
-            'manage_permissions',
-        ];
+        // Permissão para acessar o painel (opcional, mas útil)
+        $permissions[] = 'acessar_painel';
 
-        $allPermissionNames = array_unique(array_merge($permissions, $extraPermissions));
+        // Remove duplicados
+        $permissions = array_unique($permissions);
 
-        // 4. Cria todas as permissões no banco
-        foreach ($allPermissionNames as $name) {
+        // Cria permissões no banco
+        foreach ($permissions as $name) {
             Permission::firstOrCreate(['name' => $name]);
         }
 
-        // 5. Atribui TODAS as permissões à role "super_admin"
-        $superAdminRole->syncPermissions($allPermissionNames);
+        // Atribui todas as permissões à role super_admin
+        $superAdminRole->syncPermissions($permissions);
 
-        // 6. Cria o usuário super admin (se não existir)
-        $superAdminEmail = 'admin@ovana.com'; // 🔁 ALTERE PARA SEU EMAIL!
-
-        if (! User::where('email', $superAdminEmail)->exists()) {
+        // Cria super admin
+        $email = 'admin@ovana.com';
+        if (!User::where('email', $email)->exists()) {
             $user = User::create([
                 'name' => 'Super Admin',
-                'email' => $superAdminEmail,
-                'password' => bcrypt('12345678'), // 🔁 ALTERE A SENHA!
+                'email' => $email,
+                'password' => bcrypt('123456789'),
             ]);
-
             $user->assignRole('super_admin');
         }
 
-        $this->command->info('✅ Super Admin criado com todas as permissões do Filament!');
+        $this->command->info('✅ Super Admin criado com permissões em português!');
     }
 }
+
+//COMANDOS
+
+// php artisan migrate:fresh --seed
+// php artisan config:clear
+// php artisan cache:clear
+// composer dump-autoload
+

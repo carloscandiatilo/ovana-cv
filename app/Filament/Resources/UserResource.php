@@ -3,10 +3,10 @@
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\UserResource\Pages;
+use App\Filament\Resources\Base\Resource; 
 use App\Models\User;
 use Filament\Forms;
 use Filament\Forms\Form;
-use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Filament\Forms\Components\TextInput;
@@ -14,10 +14,9 @@ use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Select;
 use Filament\Tables\Columns\TextColumn;
 use Illuminate\Support\Facades\Hash;
-use Filament\Forms\Components\Toggle;
-use Filament\Forms\Get;
 
-class UserResource extends Resource
+
+class UserResource extends Resource 
 {
     protected static ?string $model = User::class;
 
@@ -27,7 +26,8 @@ class UserResource extends Resource
 
     protected static ?string $recordTitleAttribute = 'name';
 
-        public static function getNavigationLabel(): string
+
+    public static function getNavigationLabel(): string
     {
         return __('Usuários');
     }
@@ -43,73 +43,74 @@ class UserResource extends Resource
     }
 
     public static function form(Form $form): Form
-{
-    return $form
-        ->schema([
-            Section::make('Informações do Usuário')
-                ->icon('heroicon-o-user')
-                ->description('Dados básicos do usuário.')
-                ->schema([
-                    TextInput::make('name')
-                        ->label('Nome')
-                        ->required()
-                        ->maxLength(255)
-                        ->autofocus(),
+    {
+        return $form
+            ->schema([
+                Section::make('Informações do Usuário')
+                    ->icon('heroicon-o-user')
+                    ->description('Dados básicos do usuário.')
+                    ->schema([
+                        TextInput::make('name')
+                            ->label('Nome')
+                            ->required()
+                            ->maxLength(255)
+                            ->autofocus(),
 
-                    TextInput::make('email')
-                        ->label('E-mail')
-                        ->email()
-                        ->required()
-                        ->maxLength(255)
-                        ->unique(ignoreRecord: true),
-                ])
-                ->columns(2),
+                        TextInput::make('email')
+                            ->label('E-mail')
+                            ->email()
+                            ->required()
+                            ->maxLength(255)
+                            ->unique(ignoreRecord: true),
+                    ])
+                    ->columns(2),
 
-            Section::make('Senha')
-                ->icon('heroicon-o-lock-closed')
-                ->description('Preencha os campos abaixo para definir ou alterar a senha.')
-                ->schema([
-                    TextInput::make('password')
-                        ->label('Senha')
-                        ->password()
-                        ->revealable()
-                        ->minLength(8)
-                        ->required(fn (string $operation): bool => $operation === 'create')
-                        ->dehydrated(fn (?string $state): bool => filled($state))
-                        ->helperText(fn (string $operation) => $operation === 'create'
-                            ? 'Mínimo de 8 caracteres.'
-                            : 'Deixe em branco para manter a senha atual.'),
+                Section::make('Senha')
+                    ->icon('heroicon-o-lock-closed')
+                    ->description('Preencha os campos abaixo para definir ou alterar a senha.')
+                    ->schema([
+                        TextInput::make('password')
+                            ->label('Senha')
+                            ->password()
+                            ->revealable()
+                            ->minLength(8)
+                            ->required(fn (string $operation): bool => $operation === 'create')
+                            ->dehydrated(fn (?string $state): bool => filled($state))
+                            ->helperText(fn (string $operation) => $operation === 'create'
+                                ? 'Mínimo de 8 caracteres.'
+                                : 'Deixe em branco para manter a senha atual.'),
 
-                    TextInput::make('passwordConfirmation')
-                        ->label('Confirmar Senha')
-                        ->password()
-                        ->revealable()
-                        ->required(fn (string $operation): bool => $operation === 'create')
-                        ->same('password')
-                        ->dehydrated(false)
-                        ->helperText(fn (string $operation) => $operation === 'create'
-                            ? 'Confirme a senha digitada acima.'
-                            : 'Confirme apenas se estiver alterando a senha.'),
-                ])
-                ->columns(2) // 👈 Lado a lado!
-                ->compact(),
+                        TextInput::make('passwordConfirmation')
+                            ->label('Confirmar Senha')
+                            ->password()
+                            ->revealable()
+                            ->required(fn (string $operation): bool => $operation === 'create')
+                            ->same('password')
+                            ->dehydrated(false)
+                            ->helperText(fn (string $operation) => $operation === 'create'
+                                ? 'Confirme a senha digitada acima.'
+                                : 'Confirme apenas se estiver alterando a senha.'),
+                    ])
+                    ->columns(2)
+                    ->compact(),
 
-            Section::make('Acesso e Permissões')
-                ->icon('heroicon-o-shield-check')
-                ->description('Atribua roles para definir as permissões do usuário.')
-                ->schema([
-                    Select::make('roles')
-                        ->label('Roles')
-                        ->multiple()
-                        ->relationship('roles', 'name')
-                        ->preload()
-                        ->searchable()
-                        ->placeholder('Selecione uma ou mais roles...')
-                        ->helperText('As roles determinam o que o usuário pode fazer no sistema.'),
-                ])
-                ->compact(),
-        ]);
-}
+                Section::make('Acesso e Permissões')
+                    ->icon('heroicon-o-shield-check')
+                    ->description('Atribua roles para definir as permissões do usuário.')
+                    ->schema([
+                        Select::make('roles')
+                            ->label('Roles')
+                            ->multiple()
+                            ->relationship('roles', 'name')
+                            ->preload()
+                            ->searchable()
+                            ->placeholder('Selecione uma ou mais roles...')
+                            ->helperText('As roles determinam o que o usuário pode fazer no sistema.'),
+                    ])
+                    ->compact(),
+            ]);
+    }
+
     public static function table(Table $table): Table
     {
         return $table

@@ -2,95 +2,98 @@
 
 namespace App\Filament\Resources;
 
-use App\Filament\Resources\EnsinoResource\Pages;
-use App\Filament\Resources\Base\Resource;
-use App\Models\Ensino;
+use App\Filament\Resources\WizardResource\Sections;
 use Filament\Forms;
-use Filament\Forms\Form;
-use Filament\Forms\Components\Hidden;
-use Filament\Forms\Components\TextInput;
-use Filament\Tables;
-use Filament\Tables\Table;
-use Filament\Tables\Columns\TextColumn;
+use Filament\Forms\Components\Section;
+use Filament\Forms\Components\Repeater;
 
-class EnsinoResource extends Resource
+class EnsinoResource
 {
-    protected static ?string $model = Ensino::class;
-
-    protected static ?string $navigationIcon = 'heroicon-o-academic-cap';
-    protected static ?string $navigationGroup = 'Currículos';
-
     /**
-     * Form (standalone) — inclui hidden curriculum_id e usa schema().
-     */
-    public static function form(Form $form): Form
-    {
-        return $form->schema(array_merge(
-            [
-                Hidden::make('curriculum_id')
-                    ->default(fn () => request()->query('curriculum_id'))
-                    ->required(),
-            ],
-            static::schema()
-        ))->columns(1);
-    }
-
-    /**
-     * Alias compatível (se algum código chamar getFormSchema()).
+     * Retorna o schema completo de todas as sections de Dados de Ensino
      */
     public static function getFormSchema(): array
     {
-        return static::schema();
-    }
-
-    /**
-     * Schema reutilizável — usado também pelo Wizard (Repeater->schema())
-     */
-    public static function schema(): array
-    {
-        $currentYear = date('Y');
-
         return [
-            TextInput::make('disciplina')
-                ->label('Disciplina')
-                ->required()
-                ->maxLength(255),
+            Section::make('Material Pedagógico')
+                ->description('Registos de materiais pedagógicos do currículo')
+                ->schema([
+                    Repeater::make('material_pedagogicos')
+                        ->relationship('material_pedagogicos')
+                        ->schema([
+                            Forms\Components\TextInput::make('tipo_material')->required(),
+                            Forms\Components\TextInput::make('ano_publicacao')->type('number')->maxLength(4),
+                            Forms\Components\TextInput::make('coautor'),
+                            Forms\Components\TextInput::make('registro'),
+                            Forms\Components\TextInput::make('link'),
+                        ])
+                        ->columns(2),
+                ])
+                ->collapsible(),
 
-            TextInput::make('instituicao')
-                ->label('Instituição')
-                ->maxLength(255),
+            Section::make('Orientação de Estudante')
+                ->description('Registos de orientações de estudantes')
+                ->schema([
+                    Repeater::make('orientacao_estudantes')
+                        ->relationship('orientacao_estudantes')
+                        ->schema([
+                            Forms\Components\TextInput::make('pais')->required(),
+                            Forms\Components\TextInput::make('tipo_orientacao')->required(),
+                            Forms\Components\TextInput::make('nome_estudante')->required(),
+                            Forms\Components\TextInput::make('ano_conclusao')->type('number')->maxLength(4),
+                            Forms\Components\TextInput::make('instituicao'),
+                        ])
+                        ->columns(2),
+                ])
+                ->collapsible(),
 
-            TextInput::make('ano')
-                ->label('Ano')
-                ->numeric()
-                ->minValue(1900)
-                ->maxValue($currentYear),
-        ];
-    }
+            Section::make('Responsabilidade de Orientação')
+                ->description('Registos de responsabilidade em orientação')
+                ->schema([
+                    Repeater::make('responsabilidade_orientacoes')
+                        ->relationship('responsabilidade_orientacoes')
+                        ->schema([
+                            Forms\Components\TextInput::make('pais')->required(),
+                            Forms\Components\TextInput::make('tipo_responsabilidade')->required(),
+                            Forms\Components\TextInput::make('nome_estudante')->required(),
+                            Forms\Components\TextInput::make('ano_conclusao')->type('number')->maxLength(4),
+                            Forms\Components\TextInput::make('instituicao'),
+                        ])
+                        ->columns(2),
+                ])
+                ->collapsible(),
 
-    /**
-     * Table columns
-     */
-    public static function table(Table $table): Table
-    {
-        return $table->columns([
-            TextColumn::make('id')->label('ID')->sortable(),
-            TextColumn::make('curriculum.pessoal.nome')->label('Currículo')->wrap(),
-            TextColumn::make('disciplina')->label('Disciplina')->wrap(),
-            TextColumn::make('instituicao')->label('Instituição')->wrap(),
-            TextColumn::make('ano')->label('Ano')->sortable(),
-        ]);
-    }
+            Section::make('Leccionação')
+                ->description('Registos de leccionação')
+                ->schema([
+                    Repeater::make('leccionacoes')
+                        ->relationship('leccionacoes')
+                        ->schema([
+                            Forms\Components\TextInput::make('tipo_participacao')->required(),
+                            Forms\Components\TextInput::make('disciplina')->required(),
+                            Forms\Components\TextInput::make('ano')->type('number')->maxLength(4),
+                            Forms\Components\TextInput::make('instituicao'),
+                            Forms\Components\TextInput::make('pais'),
+                        ])
+                        ->columns(2),
+                ])
+                ->collapsible(),
 
-    /**
-     * Pages (List/Create/Edit)
-     */
-    public static function getPages(): array
-    {
-        return [
-            'index'  => Pages\ListEnsinos::route('/'),
-            'create' => Pages\CreateEnsino::route('/create'),
-            'edit'   => Pages\EditEnsino::route('/{record}/edit'),
+            Section::make('Infraestrutura de Ensino')
+                ->description('Registos de infraestrutura de ensino')
+                ->schema([
+                    Repeater::make('infraestrutura_ensinos')
+                        ->relationship('infraestrutura_ensinos')
+                        ->schema([
+                            Forms\Components\TextInput::make('tipo_infraestrutura')->required(),
+                            Forms\Components\TextInput::make('nome_lab_plataforma')->required(),
+                            Forms\Components\TextInput::make('registro_responsavel'),
+                            Forms\Components\TextInput::make('ano')->type('number')->maxLength(4),
+                            Forms\Components\TextInput::make('instituicao'),
+                        ])
+                        ->columns(2),
+                ])
+                ->collapsible(),
         ];
     }
 }

@@ -44,16 +44,12 @@ class CurriculumResource extends Resource
     {
         return __('Currículos');
     }
-    
 
     public static function shouldRegisterNavigation(): bool
     {
         return false;
     }
 
-    /**
-     * Restringe a query por user quando não tiver permissão global.
-     */
     public static function getEloquentQuery(): Builder
     {
         $query = parent::getEloquentQuery();
@@ -65,64 +61,36 @@ class CurriculumResource extends Resource
         return $query;
     }
 
-    /**
-     * Retorna opções de países de forma "assíncrona" — a closure de options
-     * no Select só chamará este método quando houver pesquisa (search) do lado do Livewire,
-     * evitando carregar tudo no render inicial.
-     *
-     * @param string|null $search
-     * @return array<string, string>
-     */
-    public static function getCountryOptions(?string $search = null): array
+    public static function getCountryOptions(): array
     {
-        // Não carregar lista completa no render inicial.
-        // O Select ->searchable() chamará esta função com $search quando o utilizador digitar.
-        if (empty($search)) {
-            return [];
-        }
-
-        $cacheKey = 'restcountries_search_' . md5($search);
-
-        return Cache::remember($cacheKey, 60 * 60, function () use ($search) {
+        return Cache::remember('all_countries', 3600, function () {
             try {
-                // Usamos o endpoint name para pesquisar por substring/nome.
-                $url = 'https://restcountries.com/v3.1/name/' . urlencode($search) . '?fields=name';
-                $response = Http::get($url);
+                $response = Http::get('https://restcountries.com/v3.1/all?fields=name');
 
                 if (! $response->successful()) {
                     return [];
                 }
 
-                $data = collect($response->json())
+                $countries = collect($response->json())
                     ->pluck('name.common')
                     ->unique()
                     ->sort()
                     ->values()
                     ->toArray();
 
-                return array_combine($data, $data);
+                return array_combine($countries, $countries);
             } catch (\Throwable $e) {
-                // Em caso de falha devolve array vazio para não quebrar o form.
                 return [];
             }
         });
     }
 
-    /**
-     * Esquema reutilizável do formulário do Curriculum.
-     * O WizardResource chama CurriculumResource::getFormSchema().
-     *
-     * NOTE: não estamos a pré-carregar a lista completa de países no carregamento do formulário.
-     * O campo país usa ->searchable() e chama getCountryOptions($search) à medida que o usuário digita.
-     *
-     * @return array<int, \Filament\Forms\Components\Component>
-     */
     public static function getFormSchema(): array
     {
         $currentYear = date('Y');
 
         return [
-            // Foto e Status na mesma linha (duas colunas)
+            // FOTO & STATUS
             Section::make('Foto & Status')
                 ->icon('heroicon-o-camera')
                 ->schema([
@@ -132,9 +100,7 @@ class CurriculumResource extends Resource
                         ->directory('curriculums/avatars')
                         ->visibility('public')
                         ->maxSize(2048)
-                        ->acceptedFileTypes(['image/jpeg', 'image/png'])
-                        // não obrigamos por padrão, mas podes ajustar ->required() se quiseres
-                        ,
+                        ->acceptedFileTypes(['image/jpeg', 'image/png']),
 
                     Select::make('status')
                         ->label('Status')
@@ -147,70 +113,27 @@ class CurriculumResource extends Resource
                         ->visible(fn () => Auth::user()?->can('editar_curriculum')),
                 ])
                 ->columns(2)
-                // Mantemos comportamento seguro caso o section seja escondido em alguma situação.
                 ->saveRelationshipsWhenHidden(),
 
-            // Dados Pessoais
+            // DADOS PESSOAIS
             Section::make('Dados Pessoais')
                 ->icon('heroicon-o-user')
                 ->schema([
-                    TextInput::make('pessoal.nome')
-                        ->label('Nome')
-                        ->required()
-                        ->maxLength(255),
-
-                    TextInput::make('pessoal.nome_do_meio')
-                        ->label('Nome do Meio')
-                        ->maxLength(255),
-
-                    TextInput::make('pessoal.apelido')
-                        ->label('Apelido')
-                        ->maxLength(255),
-
-                    TextInput::make('pessoal.orcid')
-                        ->label('ORCID')
-                        ->url()
-                        ->maxLength(255),
-
-                    TextInput::make('pessoal.instituicao_nome')
-                        ->label('Instituição')
-                        ->maxLength(255),
-
-                    TextInput::make('pessoal.endereco_rua_bairro')
-                        ->label('Rua / Bairro')
-                        ->maxLength(255),
-
-                    TextInput::make('pessoal.endereco_municipio')
-                        ->label('Município')
-                        ->maxLength(255),
-
+                    TextInput::make('pessoal.nome')->label('Nome')->required()->maxLength(255),
+                    TextInput::make('pessoal.nome_do_meio')->label('Nome do Meio')->maxLength(255),
+                    TextInput::make('pessoal.apelido')->label('Apelido')->maxLength(255),
+                    TextInput::make('pessoal.orcid')->label('ORCID')->url()->maxLength(255),
+                    TextInput::make('pessoal.instituicao_nome')->label('Instituição')->maxLength(255),
+                    TextInput::make('pessoal.endereco_rua_bairro')->label('Rua / Bairro')->maxLength(255),
+                    TextInput::make('pessoal.endereco_municipio')->label('Município')->maxLength(255),
                     Select::make('pessoal.endereco_pais')
                         ->label('País')
                         ->searchable()
-                        // A closure abaixo será chamada pelo Livewire quando o utilizador digitar,
-                        // passando o termo de pesquisa como parâmetro.
-                        ->options(fn (?string $search = null) => static::getCountryOptions($search))
-                        ->placeholder('Digite para pesquisar países')
-                        ->maxItems(1)
-                        ->reactive()
+                        ->options(fn (?string $search = null) => static::getCountryOptions())
                         ->required(),
-
-                    // Se precisares de mostrar províncias apenas para Angola, podes adicionar lógica client-side.
-                    TextInput::make('pessoal.website')
-                        ->label('Website')
-                        ->url()
-                        ->maxLength(255),
-
-                    TextInput::make('pessoal.email_pessoal')
-                        ->label('E-mail Pessoal')
-                        ->email()
-                        ->maxLength(255),
-
-                    TextInput::make('pessoal.email_profissional')
-                        ->label('E-mail Profissional')
-                        ->email()
-                        ->maxLength(255),
-
+                    TextInput::make('pessoal.website')->label('Website')->url()->maxLength(255),
+                    TextInput::make('pessoal.email_pessoal')->label('E-mail Pessoal')->email()->maxLength(255),
+                    TextInput::make('pessoal.email_profissional')->label('E-mail Profissional')->email()->maxLength(255),
                     Select::make('idiomas')
                         ->label('Idiomas')
                         ->multiple()
@@ -221,51 +144,55 @@ class CurriculumResource extends Resource
                 ->columns(2)
                 ->saveRelationshipsWhenHidden(),
 
-            // Formações Acadêmicas (repeater)
+            // FORMAÇÕES ACADÊMICAS
             Section::make('Formações Acadêmicas')
                 ->icon('heroicon-o-academic-cap')
                 ->schema([
                     Repeater::make('formacoes_academicas')
-                        ->label('Formações Acadêmicas')
                         ->schema([
                             Select::make('grau_academico')
                                 ->label('Grau Acadêmico')
                                 ->options([
-                                    'Licenciatura'   => 'Licenciatura',
-                                    'Mestrado'       => 'Mestrado',
-                                    'Doutorado'      => 'Doutorado',
-                                    'Pos-Doutorado'  => 'Pós-Doutorado',
+                                    'Licenciatura'=>'Licenciatura',
+                                    'Mestrado'=>'Mestrado',
+                                    'Doutorado'=>'Doutorado',
+                                    'Pos-Doutorado'=>'Pós-Doutorado',
                                 ])
                                 ->required(),
-
                             TextInput::make('instituicao_formacao')->label('Instituição')->maxLength(255),
-
                             TextInput::make('ano_inicio')
                                 ->label('Ano de Início')
                                 ->numeric()
+                                ->maxLength(4)
                                 ->minValue(1900)
-                                ->maxValue($currentYear),
-
+                                ->maxValue($currentYear)
+                                ->reactive(),
                             TextInput::make('ano_conclusao')
                                 ->label('Ano de Conclusão')
                                 ->numeric()
+                                ->maxLength(4)
                                 ->minValue(1900)
-                                ->maxValue($currentYear),
-
+                                ->maxValue($currentYear)
+                                ->reactive()
+                                ->afterStateUpdated(function ($state, callable $set, $get) {
+                                    if ($get('ano_inicio') && $state < $get('ano_inicio')) {
+                                        $set('ano_conclusao', $get('ano_inicio'));
+                                    }
+                                }),
                             TextInput::make('titulo_monografia')->label('Título da Monografia')->maxLength(255),
                             TextInput::make('nome_orientador')->label('Orientador')->maxLength(255),
-
                             Select::make('pais')
                                 ->label('País')
                                 ->searchable()
-                                ->options(fn (?string $search = null) => static::getCountryOptions($search)),
+                                ->options(fn (?string $search = null) => static::getCountryOptions())
+                                ->required(),
                         ])
                         ->columns(2)
                         ->createItemButtonLabel('Adicionar Formação'),
                 ])
                 ->saveRelationshipsWhenHidden(),
 
-            // Formações Complementares
+            // FORMAÇÕES COMPLEMENTARES
             Section::make('Formações Complementares')
                 ->icon('heroicon-o-book-open')
                 ->schema([
@@ -273,15 +200,25 @@ class CurriculumResource extends Resource
                         ->schema([
                             TextInput::make('nome_curso')->label('Nome do Curso')->maxLength(255),
                             TextInput::make('instituicao_formacao')->label('Instituição')->maxLength(255),
-                            TextInput::make('ano_conclusao')->label('Ano de Conclusão')->numeric()->minValue(1900)->maxValue($currentYear),
+                            TextInput::make('ano_conclusao')
+                                ->label('Ano de Conclusão')
+                                ->numeric()
+                                ->maxLength(4)
+                                ->minValue(1900)
+                                ->maxValue($currentYear),
                             TextInput::make('carga_horaria')->label('Carga Horária (h)')->numeric()->minValue(1),
+                            Select::make('pais')
+                                ->label('País')
+                                ->searchable()
+                                ->options(fn (?string $search = null) => static::getCountryOptions())
+                                ->required(),
                         ])
                         ->columns(2)
                         ->createItemButtonLabel('Adicionar Formação Complementar'),
                 ])
                 ->saveRelationshipsWhenHidden(),
 
-            // Prêmios
+            // PRÊMIOS
             Section::make('Prêmios')
                 ->icon('heroicon-o-trophy')
                 ->schema([
@@ -289,63 +226,97 @@ class CurriculumResource extends Resource
                         ->schema([
                             TextInput::make('nome_premiacao')->label('Nome da Premiação')->maxLength(255),
                             TextInput::make('instituicao')->label('Instituição')->maxLength(255),
-                            TextInput::make('ano_atribuicao')->label('Ano')->numeric()->minValue(1900)->maxValue($currentYear),
-                            Select::make('pais')->label('País')->searchable()->options(fn (?string $s = null) => static::getCountryOptions($s)),
+                            TextInput::make('ano_atribuicao')
+                                ->label('Ano')
+                                ->numeric()
+                                ->minValue(1900)
+                                ->maxValue($currentYear),
+                            Select::make('pais')
+                                ->label('País')
+                                ->searchable()
+                                ->options(fn (?string $search = null) => static::getCountryOptions())
+                                ->required(),
                         ])
                         ->columns(2)
                         ->createItemButtonLabel('Adicionar Prémio'),
                 ])
                 ->saveRelationshipsWhenHidden(),
 
-            // Atuação Profissional
+            // ATUAÇÃO PROFISSIONAL
             Section::make('Atuação Profissional')
                 ->icon('heroicon-o-briefcase')
                 ->schema([
                     Repeater::make('actuacoes_profissionais')
                         ->schema([
-                            TextInput::make('instituicao')->label('Instituição')->maxLength(255)->required(),
+                            TextInput::make('instituicao')->label('Instituição')->required()->maxLength(255),
                             Select::make('tipo_vinculo')
                                 ->label('Tipo de Vínculo')
                                 ->options([
-                                    'Efectivo'   => 'Efetivo',
-                                    'Convidado'  => 'Convidado',
-                                    'Visitante'  => 'Visitante',
-                                    'Colaborador' => 'Colaborador',
+                                    'Efectivo'=>'Efetivo',
+                                    'Convidado'=>'Convidado',
+                                    'Visitante'=>'Visitante',
+                                    'Colaborador'=>'Colaborador',
                                 ])
                                 ->required(),
                             TextInput::make('funcao')->label('Função')->maxLength(255),
-                            TextInput::make('ano_inicio')->label('Ano de Início')->numeric()->minValue(1900)->maxValue($currentYear),
-                            TextInput::make('ano_fim')->label('Ano de Fim')->numeric()->minValue(1900)->maxValue($currentYear),
+                            TextInput::make('ano_inicio')
+                                ->label('Ano de Início')
+                                ->numeric()
+                                ->maxLength(4)
+                                ->minValue(1900)
+                                ->maxValue($currentYear)
+                                ->reactive(),
+                            TextInput::make('ano_fim')
+                                ->label('Ano de Fim')
+                                ->numeric()
+                                ->maxLength(4)
+                                ->minValue(1900)
+                                ->maxValue($currentYear)
+                                ->reactive()
+                                ->afterStateUpdated(function ($state, callable $set, $get) {
+                                    if ($get('ano_inicio') && $state < $get('ano_inicio')) {
+                                        $set('ano_fim', $get('ano_inicio'));
+                                    }
+                                }),
+                            Select::make('pais')
+                                ->label('País')
+                                ->searchable()
+                                ->options(fn (?string $search = null) => static::getCountryOptions())
+                                ->required(),
                         ])
                         ->columns(2)
                         ->createItemButtonLabel('Adicionar Atuação'),
                 ])
                 ->saveRelationshipsWhenHidden(),
 
-            // Docência
+            // DOCÊNCIA
             Section::make('Docência')
                 ->icon('heroicon-o-user')
                 ->schema([
                     Repeater::make('actuacoes_docencias')
                         ->schema([
-                            Select::make('pais')->label('País')->searchable()->options(fn (?string $s = null) => static::getCountryOptions($s)),
+                            Select::make('pais')->label('País')->searchable()->options(fn (?string $s = null) => static::getCountryOptions())->required(),
                             TextInput::make('instituicao')->label('Instituição')->maxLength(255),
                             TextInput::make('disciplina')->label('Disciplina')->maxLength(255),
                             TextInput::make('carga_horaria')->label('Carga Horária (h)')->numeric()->minValue(1),
-                            TextInput::make('ano')->label('Ano')->numeric()->minValue(1900)->maxValue($currentYear),
+                            TextInput::make('ano')
+                                ->label('Ano')
+                                ->numeric()
+                                ->minValue(1900)
+                                ->maxValue($currentYear),
                         ])
                         ->columns(2)
                         ->createItemButtonLabel('Adicionar Docência'),
                 ])
                 ->saveRelationshipsWhenHidden(),
 
-            // Investigação Científica
+            // INVESTIGAÇÃO CIENTÍFICA
             Section::make('Investigação Científica')
                 ->icon('heroicon-o-magnifying-glass')
                 ->schema([
                     Repeater::make('investigacoes_cientificas')
                         ->schema([
-                            Select::make('pais')->label('País')->searchable()->options(fn (?string $s = null) => static::getCountryOptions($s)),
+                            Select::make('pais')->label('País')->searchable()->options(fn (?string $s = null) => static::getCountryOptions())->required(),
                             TextInput::make('instituicao')->label('Instituição')->maxLength(255),
                             TextInput::make('linha_investigacao')->label('Linha de Investigação')->maxLength(255),
                             TextInput::make('titulo_projeto')->label('Título do Projeto')->maxLength(255),
@@ -358,45 +329,84 @@ class CurriculumResource extends Resource
                                 ->columns(1)
                                 ->maxItems(50),
                             TextInput::make('financiador')->label('Financiador')->maxLength(255),
-                            TextInput::make('ano_inicio')->label('Ano de Início')->numeric()->minValue(1900)->maxValue($currentYear),
-                            TextInput::make('ano_fim')->label('Ano de Fim')->numeric()->minValue(1900)->maxValue($currentYear),
+                            TextInput::make('ano_inicio')
+                                ->label('Ano de Início')
+                                ->numeric()
+                                ->maxLength(4)
+                                ->minValue(1900)
+                                ->maxValue($currentYear)
+                                ->reactive(),
+                            TextInput::make('ano_fim')
+                                ->label('Ano de Fim')
+                                ->numeric()
+                                ->maxLength(4)
+                                ->minValue(1900)
+                                ->maxValue($currentYear)
+                                ->reactive()
+                                ->afterStateUpdated(function ($state, callable $set, $get) {
+                                    if ($get('ano_inicio') && $state < $get('ano_inicio')) {
+                                        $set('ano_fim', $get('ano_inicio'));
+                                    }
+                                }),
                         ])
                         ->columns(2)
                         ->createItemButtonLabel('Adicionar Investigação'),
                 ])
                 ->saveRelationshipsWhenHidden(),
 
-            // Extensão Universitária
+            // EXTENSÃO UNIVERSITÁRIA
             Section::make('Extensão Universitária')
                 ->icon('heroicon-o-building-library')
                 ->schema([
                     Repeater::make('extensoes_universitarias')
                         ->schema([
-                            Select::make('pais')->label('País')->searchable()->options(fn (?string $s = null) => static::getCountryOptions($s)),
+                            Select::make('pais')->label('País')->searchable()->options(fn (?string $s = null) => static::getCountryOptions())->required(),
                             TextInput::make('instituicao')->label('Instituição')->maxLength(255),
                             TextInput::make('projeto_extensao')->label('Projeto de Extensão')->maxLength(255),
                             TextInput::make('membros_equipa')->label('Membros da Equipa')->maxLength(255),
-                            TextInput::make('ano_inicio')->label('Ano de Início')->numeric()->minValue(1900)->maxValue($currentYear),
-                            TextInput::make('ano_fim')->label('Ano de Fim')->numeric()->minValue(1900)->maxValue($currentYear),
+                            TextInput::make('ano_inicio')->label('Ano de Início')->numeric()->minValue(1900)->maxValue($currentYear)->reactive(),
+                            TextInput::make('ano_fim')
+                                ->label('Ano de Fim')
+                                ->numeric()
+                                ->maxLength(4)
+                                ->minValue(1900)
+                                ->maxValue($currentYear)
+                                ->reactive()
+                                ->afterStateUpdated(function ($state, callable $set, $get) {
+                                    if ($get('ano_inicio') && $state < $get('ano_inicio')) {
+                                        $set('ano_fim', $get('ano_inicio'));
+                                    }
+                                }),
                         ])
                         ->columns(2)
                         ->createItemButtonLabel('Adicionar Extensão'),
                 ])
                 ->saveRelationshipsWhenHidden(),
 
-            // Captação de Financiamento
+            // CAPTAÇÃO DE FINANCIAMENTO
             Section::make('Captação de Financiamento')
                 ->icon('heroicon-o-banknotes')
                 ->schema([
                     Repeater::make('captacoes_financiamentos')
                         ->schema([
-                            Select::make('pais')->label('País')->searchable()->options(fn (?string $s = null) => static::getCountryOptions($s)),
+                            Select::make('pais')->label('País')->searchable()->options(fn (?string $s = null) => static::getCountryOptions())->required(),
                             TextInput::make('instituicao')->label('Instituição')->maxLength(255),
                             TextInput::make('nome_projeto')->label('Nome do Projeto')->maxLength(255),
                             TextInput::make('natureza_projeto')->label('Natureza do Projeto')->maxLength(255),
                             TextInput::make('codigo_registro')->label('Código de Registro')->maxLength(255),
-                            TextInput::make('ano_inicio')->label('Ano de Início')->numeric()->minValue(1900)->maxValue($currentYear),
-                            TextInput::make('ano_fim')->label('Ano de Fim')->numeric()->minValue(1900)->maxValue($currentYear),
+                            TextInput::make('ano_inicio')->label('Ano de Início')->numeric()->minValue(1900)->maxValue($currentYear)->reactive(),
+                            TextInput::make('ano_fim')
+                                ->label('Ano de Fim')
+                                ->numeric()
+                                ->maxLength(4)
+                                ->minValue(1900)
+                                ->maxValue($currentYear)
+                                ->reactive()
+                                ->afterStateUpdated(function ($state, callable $set, $get) {
+                                    if ($get('ano_inicio') && $state < $get('ano_inicio')) {
+                                        $set('ano_fim', $get('ano_inicio'));
+                                    }
+                                }),
                             TextInput::make('membros_equipa')->label('Membros da Equipa')->maxLength(255),
                             TextInput::make('valor_arrecadado')->label('Valor Arrecadado')->numeric()->minValue(0),
                         ])
@@ -407,67 +417,29 @@ class CurriculumResource extends Resource
         ];
     }
 
-    /**
-     * Formulário principal do resource — reutiliza getFormSchema()
-     */
     public static function form(Form $form): Form
     {
         return $form->schema(static::getFormSchema());
     }
 
-    /**
-     * Tabela (index) — avatar e status na mesma linha conforme pedido.
-     */
     public static function table(Table $table): Table
     {
         return $table
             ->columns([
-                ImageColumn::make('avatar')
-                    ->label('Foto')
-                    ->circular()
-                    ->toggleable(false),
-
-                TextColumn::make('status')
-                    ->label('Status')
-                    ->badge()
-                    ->color(fn (?string $state): string => match ($state) {
-                        'aprovado'  => 'success',
-                        'reprovado' => 'danger',
-                        default     => 'warning',
-                    }),
-
-                TextColumn::make('pessoal.nome')
-                    ->label('Nome')
-                    ->getStateUsing(fn (Curriculum $record) => $record->pessoal['nome'] ?? 'N/A')
-                    ->searchable()->sortable(),
-
-                TextColumn::make('pessoal.email_pessoal')
-                    ->label('Email Pessoal')
-                    ->getStateUsing(fn (Curriculum $record) => $record->pessoal['email_pessoal'] ?? null)
-                    ->wrap(),
-
-                TextColumn::make('pessoal.email_profissional')
-                    ->label('Email Profissional')
-                    ->getStateUsing(fn (Curriculum $record) => $record->pessoal['email_profissional'] ?? null)
-                    ->wrap(),
-
-                TextColumn::make('pessoal.endereco_pais')
-                    ->label('País')
-                    ->getStateUsing(fn (Curriculum $record) => $record->pessoal['endereco_pais'] ?? null)
-                    ->wrap(),
-
-                TextColumn::make('pessoal.orcid')
-                    ->label('Orcid')
-                    ->getStateUsing(fn (Curriculum $record) => $record->pessoal['orcid'] ?? null)
-                    ->wrap(),
+                ImageColumn::make('avatar')->label('Foto')->circular()->toggleable(false),
+                TextColumn::make('status')->label('Status')->badge()->color(fn(?string $state)=>match($state){'aprovado'=>'success','reprovado'=>'danger',default=>'warning'}),
+                TextColumn::make('pessoal.nome')->label('Nome')->getStateUsing(fn(Curriculum $r)=>$r->pessoal['nome']??'N/A')->searchable()->sortable(),
+                TextColumn::make('pessoal.email_pessoal')->label('Email Pessoal')->getStateUsing(fn(Curriculum $r)=>$r->pessoal['email_pessoal']??null)->wrap(),
+                TextColumn::make('pessoal.email_profissional')->label('Email Profissional')->getStateUsing(fn(Curriculum $r)=>$r->pessoal['email_profissional']??null)->wrap(),
+                TextColumn::make('pessoal.endereco_pais')->label('País')->wrap(),
+                TextColumn::make('pessoal.orcid')->label('Orcid')->getStateUsing(fn(Curriculum $r)=>$r->pessoal['orcid']??null)->wrap(),
             ])
             ->filters([
-                SelectFilter::make('status')
-                    ->options([
-                        'pendente'  => 'Pendente',
-                        'aprovado'  => 'Aprovado',
-                        'reprovado' => 'Reprovado',
-                    ]),
+                SelectFilter::make('status')->options([
+                    'pendente'=>'Pendente',
+                    'aprovado'=>'Aprovado',
+                    'reprovado'=>'Reprovado',
+                ]),
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),
@@ -478,16 +450,13 @@ class CurriculumResource extends Resource
             ]);
     }
 
-    /**
-     * Páginas (List / Create / Edit)
-     */
     public static function getPages(): array
     {
         return [
-            'index'  => Pages\ListCurricula::route('/'),
-            'create' => Pages\CreateCurriculum::route('/create'),
-            'edit'   => Pages\EditCurriculum::route('/{record}/edit'),
-            'view'   => Pages\ViewCurriculum::route('/{record}'),
+            'index'=>Pages\ListCurricula::route('/'),
+            'create'=>Pages\CreateCurriculum::route('/create'),
+            'edit'=>Pages\EditCurriculum::route('/{record}/edit'),
+            'view'=>Pages\ViewCurriculum::route('/{record}'),
         ];
     }
 }

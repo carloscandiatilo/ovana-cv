@@ -7,7 +7,6 @@ use App\Models\Curriculum;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Forms\Components\Wizard;
-use Filament\Forms\Components\Repeater;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
@@ -21,7 +20,7 @@ class WizardResource extends Resource
     protected static ?string $navigationIcon = 'heroicon-o-document-text';
     protected static ?string $navigationGroup = 'Currículos';
     protected static ?string $label = 'Currículo';
-    protected static ?int $navigationSort = -1; // fica no topo do menu
+    protected static ?int $navigationSort = -1; // Topo do menu
 
     public static function form(Form $form): Form
     {
@@ -35,14 +34,9 @@ class WizardResource extends Resource
                 // Passo 2: Dados de Ensino
                 Forms\Components\Wizard\Step::make('Dados de Ensino')
                     ->icon('heroicon-o-academic-cap')
-                    ->schema([
-                        Repeater::make('ensinos')
-                            ->relationship('ensinos')
-                            ->schema(EnsinoResource::getFormSchema())
-                            ->columns(2),
-                    ]),
+                    ->schema(EnsinoResource::getFormSchema()),
             ])
-            ->skippable(true)
+            ->skippable(true) // pode avançar livremente ao editar ou visualizar
             ->columnSpanFull(),
         ]);
     }
@@ -51,23 +45,13 @@ class WizardResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\ImageColumn::make('avatar')
-                    ->label('Foto')
-                    ->circular(),
-
+                Tables\Columns\ImageColumn::make('avatar')->label('Foto')->circular(),
                 Tables\Columns\TextColumn::make('pessoal.nome')
                     ->label('Nome')
                     ->getStateUsing(fn (Curriculum $record) => $record->pessoal['nome'] ?? 'N/A'),
-
-                Tables\Columns\TextColumn::make('pessoal.email_pessoal')
-                    ->label('Email Pessoal'),
-
-                Tables\Columns\TextColumn::make('pessoal.email_profissional')
-                    ->label('Email Profissional'),
-
-                Tables\Columns\TextColumn::make('pessoal.endereco_pais')
-                    ->label('País'),
-
+                Tables\Columns\TextColumn::make('pessoal.email_pessoal')->label('Email Pessoal'),
+                Tables\Columns\TextColumn::make('pessoal.email_profissional')->label('Email Profissional'),
+                Tables\Columns\TextColumn::make('pessoal.endereco_pais')->label('País'),
                 Tables\Columns\TextColumn::make('status')
                     ->badge()
                     ->color(fn (string $state): string => match ($state) {
@@ -77,21 +61,14 @@ class WizardResource extends Resource
                     }),
             ])
             ->actions([
-                // Visualizar
                 Tables\Actions\ViewAction::make(),
-
-                // Editar: só para o dono do currículo, se não tiver permissão global
                 Tables\Actions\EditAction::make()
                     ->visible(fn (Curriculum $record) =>
-                        ! Auth::user()->can('visualizar_qualquer_curriculum')
-                        && $record->user_id === Auth::id()
+                        ! Auth::user()->can('visualizar_qualquer_curriculum') &&
+                        $record->user_id === Auth::id()
                     ),
-
-                // Eliminar: só para quem tem permissão global
                 Tables\Actions\DeleteAction::make()
                     ->visible(fn () => Auth::user()->can('visualizar_qualquer_curriculum')),
-
-                // Validar: só admins/professores (quem tem permissão global)
                 Tables\Actions\Action::make('validar')
                     ->label('Validar')
                     ->icon('heroicon-o-check-circle')
@@ -108,9 +85,7 @@ class WizardResource extends Resource
                             ])
                             ->required(),
                     ])
-                    ->action(function (Curriculum $record, array $data) {
-                        $record->update(['status' => $data['status']]);
-                    })
+                    ->action(fn (Curriculum $record, array $data) => $record->update(['status' => $data['status']]))
                     ->visible(fn (Curriculum $record) =>
                         Auth::user()->can('visualizar_qualquer_curriculum') &&
                         in_array($record->status, ['pendente', 'reprovado'])
@@ -131,11 +106,9 @@ class WizardResource extends Resource
     public static function getEloquentQuery(): Builder
     {
         $query = parent::getEloquentQuery();
-
         if (! Auth::user()->can('visualizar_qualquer_curriculum')) {
             $query->where('user_id', Auth::id());
         }
-
         return $query;
     }
 

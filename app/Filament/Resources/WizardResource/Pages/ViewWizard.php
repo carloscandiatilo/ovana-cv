@@ -45,7 +45,8 @@ class ViewWizard extends ViewRecord
                     $record->update(['status' => $data['status']]);
                 })
                 ->visible(fn (Curriculum $record) =>
-                    in_array($record->status, ['pendente', 'reprovado'])
+                    in_array($record->status, ['pendente', 'reprovado']) &&
+                    Auth::user()->can('validar_curriculum')
                 ),
         ];
     }

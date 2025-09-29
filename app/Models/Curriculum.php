@@ -6,8 +6,6 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
-use Illuminate\Database\Eloquent\Relations\HasMany;
-use App\Models\Ensino;
 
 class Curriculum extends Model
 {
@@ -18,6 +16,7 @@ class Curriculum extends Model
     protected $fillable = [
         'user_id',
         'avatar',
+        'status',
         'pessoal',
         'formacoes_academicas',
         'formacoes_complementares',
@@ -51,11 +50,14 @@ class Curriculum extends Model
         return $this->belongsToMany(Idioma::class, 'curriculum_idioma');
     }
 
-    public function ensinos()
-    {
-        return $this->hasMany(\App\Models\Ensino::class);
-    }
+    // Removido relacionamento com ensinos
+    // public function ensinos() { return $this->hasMany(\App\Models\Ensino::class); }
 
+    public function material_pedagogicos() { return $this->hasMany(MaterialPedagogico::class); }
+    public function orientacao_estudantes() { return $this->hasMany(OrientacaoEstudante::class); }
+    public function responsabilidade_orientacoes() { return $this->hasMany(ResponsabilidadeOrientacao::class); }
+    public function leccionacoes() { return $this->hasMany(Leccionacao::class); }
+    public function infraestrutura_ensinos() { return $this->hasMany(InfraestruturaEnsino::class); }
 
     public function scopeAprovado($query)
     {

@@ -6,6 +6,8 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use App\Models\Ensino;
 
 class Curriculum extends Model
 {
@@ -48,6 +50,12 @@ class Curriculum extends Model
     {
         return $this->belongsToMany(Idioma::class, 'curriculum_idioma');
     }
+
+    public function ensinos()
+    {
+        return $this->hasMany(\App\Models\Ensino::class);
+    }
+
 
     public function scopeAprovado($query)
     {

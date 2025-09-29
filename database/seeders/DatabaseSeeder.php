@@ -15,6 +15,7 @@ class DatabaseSeeder extends Seeder
     {
         $this->call(CreateSuperAdminSeeder::class);
         $this->call(DefaultRolesSeeder::class);
+        $this->call(IdiomasSeeder::class);
         // \App\Models\User::factory(10)->create();
 
         // \App\Models\User::factory()->create([

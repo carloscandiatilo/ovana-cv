@@ -21,6 +21,7 @@ class CreateSuperAdminSeeder extends Seeder
             $model = $resource::getModel();
             $modelName = Str::snake(class_basename($model));
 
+            $permissions[] = 'visualizar_qualquer_curriculum';
             $permissions = array_merge($permissions, [
                 "visualizar_{$modelName}",
                 "criar_{$modelName}",

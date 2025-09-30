@@ -17,7 +17,7 @@ return new class extends Migration {
                 $table->string('instituicao');
                 $table->string('tipo_participacao');
                 $table->string('disciplina');
-                $table->year('ano')->nullable();
+                $table->integer('ano')->nullable();
                 $table->timestamps();
             });
         }

@@ -7,13 +7,13 @@ use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
+use App\Rules\AfterOrEqualField; // ← ADICIONADO
 
 class GestaoResource
 {
     public static function getFormSchema(): array
     {
         $currentYear = date('Y');
-
         return [
             Section::make('Cargo Unidade Orgânica')
                 ->description('Registos de cargos em unidades orgânicas')
@@ -63,7 +63,13 @@ class GestaoResource
                                 ->maxValue($currentYear)
                                 ->minLength(4)
                                 ->maxLength(4)
-                                ->rule(fn($get) => $get('fim') >= $get('inicio')),
+                                ->rules([
+                                    'nullable',
+                                    'integer',
+                                    'min:1900',
+                                    'max:'.$currentYear,
+                                    new AfterOrEqualField('inicio', 'Ano de Início'),
+                                ]),
                         ])
                         ->columns(2),
                 ]),
@@ -111,7 +117,13 @@ class GestaoResource
                                 ->maxValue($currentYear)
                                 ->minLength(4)
                                 ->maxLength(4)
-                                ->rule(fn($get) => $get('fim') >= $get('inicio')),
+                                ->rules([
+                                    'nullable',
+                                    'integer',
+                                    'min:1900',
+                                    'max:'.$currentYear,
+                                    new AfterOrEqualField('inicio', 'Ano de Início'),
+                                ]),
                         ])
                         ->columns(2),
                 ]),
@@ -156,7 +168,13 @@ class GestaoResource
                                 ->maxValue($currentYear)
                                 ->minLength(4)
                                 ->maxLength(4)
-                                ->rule(fn($get) => $get('fim') >= $get('inicio')),
+                                ->rules([
+                                    'nullable',
+                                    'integer',
+                                    'min:1900',
+                                    'max:'.$currentYear,
+                                    new AfterOrEqualField('inicio', 'Ano de Início'),
+                                ]),
                         ])
                         ->columns(2),
                 ]),
@@ -196,7 +214,13 @@ class GestaoResource
                                 ->maxValue($currentYear)
                                 ->minLength(4)
                                 ->maxLength(4)
-                                ->rule(fn($get) => $get('fim') >= $get('inicio')),
+                                ->rules([
+                                    'nullable',
+                                    'integer',
+                                    'min:1900',
+                                    'max:'.$currentYear,
+                                    new AfterOrEqualField('inicio', 'Ano de Início'),
+                                ]),
                         ])
                         ->columns(2),
                 ]),

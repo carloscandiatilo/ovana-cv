@@ -7,12 +7,13 @@ use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
-use Filament\Forms\Components\DatePicker;
+use App\Rules\AfterOrEqualField; // ← ADICIONADO
 
 class ExtensaoResource
 {
     public static function getFormSchema(): array
     {
+        $currentYear = date('Y');
         return [
             Section::make('Produção Normativa')
                 ->description('Registos de produção normativa')
@@ -44,7 +45,13 @@ class ExtensaoResource
                             TextInput::make('instituicao'),
                             TextInput::make('orgao_tutela'),
                             TextInput::make('funcao'),
-                            TextInput::make('ano')->type('number')->minValue(1900)->maxValue(date('Y'))->minLength(4)->maxLength(4),
+                            TextInput::make('ano')
+                                ->label('Ano')
+                                ->numeric()
+                                ->minValue(1900)
+                                ->maxValue($currentYear)
+                                ->minLength(4)
+                                ->maxLength(4),
                         ])
                         ->columns(2),
                 ]),
@@ -84,10 +91,27 @@ class ExtensaoResource
                             TextInput::make('instituicao'),
                             TextInput::make('instituicao_parceira'),
                             TextInput::make('coordenador_projecto'),
-                            DatePicker::make('inicio')->required(),
-                            DatePicker::make('fim')
-                                ->required()
-                                ->rule(fn($get) => $get('fim') >= $get('inicio')),
+                            TextInput::make('inicio')
+                                ->label('Ano Início')
+                                ->numeric()
+                                ->minValue(1900)
+                                ->maxValue($currentYear)
+                                ->minLength(4)
+                                ->maxLength(4),
+                            TextInput::make('fim')
+                                ->label('Ano Fim')
+                                ->numeric()
+                                ->minValue(1900)
+                                ->maxValue($currentYear)
+                                ->minLength(4)
+                                ->maxLength(4)
+                                ->rules([
+                                    'nullable',
+                                    'integer',
+                                    'min:1900',
+                                    'max:'.$currentYear,
+                                    new AfterOrEqualField('inicio', 'Ano de Início'),
+                                ]),
                         ])
                         ->columns(2),
                 ]),
@@ -124,10 +148,27 @@ class ExtensaoResource
                             TextInput::make('local_realizacao'),
                             TextInput::make('instituicao'),
                             TextInput::make('instituicoes_envolvidas'),
-                            DatePicker::make('inicio')->required(),
-                            DatePicker::make('fim')
-                                ->required()
-                                ->rule(fn($get) => $get('fim') >= $get('inicio')),
+                            TextInput::make('inicio')
+                                ->label('Ano Início')
+                                ->numeric()
+                                ->minValue(1900)
+                                ->maxValue($currentYear)
+                                ->minLength(4)
+                                ->maxLength(4),
+                            TextInput::make('fim')
+                                ->label('Ano Fim')
+                                ->numeric()
+                                ->minValue(1900)
+                                ->maxValue($currentYear)
+                                ->minLength(4)
+                                ->maxLength(4)
+                                ->rules([
+                                    'nullable',
+                                    'integer',
+                                    'min:1900',
+                                    'max:'.$currentYear,
+                                    new AfterOrEqualField('inicio', 'Ano de Início'),
+                                ]),
                         ])
                         ->columns(2),
                 ]),
@@ -156,13 +197,36 @@ class ExtensaoResource
                             TextInput::make('instituicao_parceira'),
                             TextInput::make('local_actividade'),
                             TextInput::make('nome_mecanismo'),
-                            TextInput::make('ano')->type('number')->minValue(1900)->maxValue(date('Y'))->minLength(4)->maxLength(4),
+                            TextInput::make('ano')
+                                ->label('Ano')
+                                ->numeric()
+                                ->minValue(1900)
+                                ->maxValue($currentYear)
+                                ->minLength(4)
+                                ->maxLength(4),
                             TextInput::make('coordenador_protocolo'),
                             TextInput::make('instituicao'),
-                            DatePicker::make('inicio')->required(),
-                            DatePicker::make('fim')
-                                ->required()
-                                ->rule(fn($get) => $get('fim') >= $get('inicio')),
+                            TextInput::make('inicio')
+                                ->label('Ano Início')
+                                ->numeric()
+                                ->minValue(1900)
+                                ->maxValue($currentYear)
+                                ->minLength(4)
+                                ->maxLength(4),
+                            TextInput::make('fim')
+                                ->label('Ano Fim')
+                                ->numeric()
+                                ->minValue(1900)
+                                ->maxValue($currentYear)
+                                ->minLength(4)
+                                ->maxLength(4)
+                                ->rules([
+                                    'nullable',
+                                    'integer',
+                                    'min:1900',
+                                    'max:'.$currentYear,
+                                    new AfterOrEqualField('inicio', 'Ano de Início'),
+                                ]),
                             TextInput::make('instituicoes_envolvidas'),
                         ])
                         ->columns(2),

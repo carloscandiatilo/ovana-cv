@@ -17,7 +17,7 @@ return new class extends Migration
             $table->string('tipo_producao');
             $table->string('nome_producao');
             $table->string('pais')->nullable();
-            $table->year('ano')->nullable();
+            $table->integer('ano')->nullable();
             $table->string('registro')->nullable();
             $table->string('coautor')->nullable();
             $table->timestamps();

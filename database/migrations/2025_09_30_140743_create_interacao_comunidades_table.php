@@ -22,8 +22,8 @@ return new class extends Migration
             $table->string('local_realizacao')->nullable();
             $table->string('instituicao')->nullable();
             $table->string('instituicoes_envolvidas')->nullable();
-            $table->year('inicio')->nullable();
-            $table->year('fim')->nullable();
+            $table->integer('inicio')->nullable();
+            $table->integer('fim')->nullable();
             $table->timestamps();
         });
 

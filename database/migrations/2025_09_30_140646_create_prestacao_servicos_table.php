@@ -21,8 +21,8 @@ return new class extends Migration
             $table->string('instituicao')->nullable();
             $table->string('instituicao_parceira')->nullable();
             $table->string('coordenador_projecto')->nullable();
-            $table->year('inicio')->nullable();
-            $table->year('fim')->nullable();
+            $table->integer('inicio')->nullable();
+            $table->integer('fim')->nullable();
             $table->timestamps();
         });
 

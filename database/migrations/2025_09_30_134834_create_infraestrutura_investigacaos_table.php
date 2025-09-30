@@ -19,7 +19,7 @@ return new class extends Migration
             $table->string('laboratorio');
             $table->string('nome_responsavel');
             $table->string('registro')->nullable();
-            $table->year('ano')->nullable();
+            $table->integer('ano')->nullable();
             $table->timestamps();
         });
 

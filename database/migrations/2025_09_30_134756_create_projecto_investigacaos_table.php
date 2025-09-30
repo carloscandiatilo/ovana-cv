@@ -19,7 +19,7 @@ return new class extends Migration
                 $table->text('objectivo')->nullable();
                 $table->string('instituicao')->nullable();
                 $table->text('membros_equipa')->nullable();
-                $table->date('inicio')->nullable();
+                $table->integer('inicio')->nullable();
                 $table->timestamps();
             });
 

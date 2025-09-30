@@ -16,8 +16,8 @@ return new class extends Migration
             $table->foreignId('curriculum_id')->constrained('curriculums')->cascadeOnDelete();
             $table->string('cargo_tipo');
             $table->string('instituicao');
-            $table->year('inicio')->nullable();
-            $table->year('fim')->nullable();
+            $table->integer('inicio')->nullable();
+            $table->integer('fim')->nullable();
             $table->timestamps();
         });
 

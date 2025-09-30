@@ -17,7 +17,7 @@ return new class extends Migration {
                 $table->string('tipo_infraestrutura');
                 $table->string('nome_lab_plataforma')->nullable();
                 $table->string('registro_responsavel')->nullable();
-                $table->year('ano')->nullable();
+                $table->integer('ano')->nullable();
                 $table->timestamps();
             });
         }

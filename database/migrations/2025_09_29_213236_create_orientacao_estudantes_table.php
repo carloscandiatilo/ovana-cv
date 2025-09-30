@@ -16,7 +16,7 @@ return new class extends Migration {
                 $table->string('pais');
                 $table->string('tipo_orientacao');
                 $table->string('nome_estudante');
-                $table->year('ano_conclusao')->nullable();
+                $table->integer('ano_conclusao')->nullable();
                 $table->string('instituicao')->nullable();
                 $table->timestamps();
             });

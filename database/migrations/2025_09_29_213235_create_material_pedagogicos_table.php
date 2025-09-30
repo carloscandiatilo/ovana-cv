@@ -14,7 +14,7 @@ return new class extends Migration {
                       ->constrained('curriculums')
                       ->cascadeOnDelete();
                 $table->string('tipo_material');
-                $table->year('ano_publicacao')->nullable();
+                $table->integer('ano_publicacao')->nullable();
                 $table->string('coautor')->nullable();
                 $table->string('registro')->nullable();
                 $table->string('link')->nullable();

@@ -9,29 +9,24 @@ use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
+use App\Rules\AfterOrEqualField; // ← Adicionado para consistência e futuro uso
 
 class EnsinoResource
 {
-    /**
-     * Retorna opções de país via API REST ou cache
-     */
     public static function getCountryOptions(): array
     {
         return Cache::remember('all_countries', 3600, function () {
             try {
                 $response = Http::get('https://restcountries.com/v3.1/all?fields=name');
-
                 if (! $response->successful()) {
                     return [];
                 }
-
                 $countries = collect($response->json())
                     ->pluck('name.common')
                     ->unique()
                     ->sort()
                     ->values()
                     ->toArray();
-
                 return array_combine($countries, $countries);
             } catch (\Throwable $e) {
                 return [];
@@ -42,7 +37,6 @@ class EnsinoResource
     public static function getFormSchema(): array
     {
         $currentYear = date('Y');
-
         return [
             Section::make('Material Pedagógico')
                 ->description('Registos de materiais pedagógicos do currículo')
@@ -72,14 +66,13 @@ class EnsinoResource
                                 ])
                                 ->searchable()
                                 ->required(),
-
                             TextInput::make('ano_publicacao')
                                 ->label('Ano de Publicação')
                                 ->numeric()
                                 ->minValue(1900)
                                 ->maxValue($currentYear)
-                                ->maxLength(4),
-
+                                ->maxLength(4)
+                                ->rules(['nullable','integer','min:1900','max:'.$currentYear]),
                             TextInput::make('coautor')->label('Coautor')->maxLength(255),
                             TextInput::make('registro')->label('Registro')->maxLength(255),
                             TextInput::make('link')->label('Link')->url()->maxLength(255),
@@ -100,7 +93,6 @@ class EnsinoResource
                                 ->options(fn() => self::getCountryOptions())
                                 ->searchable()
                                 ->required(),
-
                             Select::make('tipo_orientacao')
                                 ->label('Tipo de Orientação')
                                 ->options([
@@ -115,14 +107,14 @@ class EnsinoResource
                                 ])
                                 ->searchable()
                                 ->required(),
-
                             TextInput::make('nome_estudante')->label('Nome do Estudante')->required()->maxLength(255),
                             TextInput::make('ano_conclusao')
                                 ->label('Ano de Conclusão')
                                 ->numeric()
                                 ->minValue(1900)
                                 ->maxValue($currentYear)
-                                ->maxLength(4),
+                                ->maxLength(4)
+                                ->rules(['nullable','integer','min:1900','max:'.$currentYear]),
                             TextInput::make('instituicao')->label('Instituição')->maxLength(255),
                         ])
                         ->columns(2)
@@ -141,7 +133,6 @@ class EnsinoResource
                                 ->options(fn() => self::getCountryOptions())
                                 ->searchable()
                                 ->required(),
-
                             Select::make('tipo_responsabilidade')
                                 ->label('Tipo de Responsabilidade')
                                 ->options([
@@ -154,14 +145,14 @@ class EnsinoResource
                                 ])
                                 ->searchable()
                                 ->required(),
-
                             TextInput::make('nome_estudante')->label('Nome do Estudante')->required()->maxLength(255),
                             TextInput::make('ano_conclusao')
                                 ->label('Ano de Conclusão')
                                 ->numeric()
                                 ->minValue(1900)
                                 ->maxValue($currentYear)
-                                ->maxLength(4),
+                                ->maxLength(4)
+                                ->rules(['nullable','integer','min:1900','max:'.$currentYear]),
                             TextInput::make('instituicao')->label('Instituição')->maxLength(255),
                         ])
                         ->columns(2)
@@ -189,14 +180,14 @@ class EnsinoResource
                                 ])
                                 ->searchable()
                                 ->required(),
-
                             TextInput::make('disciplina')->label('Disciplina')->required()->maxLength(255),
                             TextInput::make('ano')
                                 ->label('Ano')
                                 ->numeric()
                                 ->minValue(1900)
                                 ->maxValue($currentYear)
-                                ->maxLength(4),
+                                ->maxLength(4)
+                                ->rules(['nullable','integer','min:1900','max:'.$currentYear]),
                             TextInput::make('instituicao')->label('Instituição')->maxLength(255),
                             Select::make('pais')
                                 ->label('País')
@@ -226,7 +217,6 @@ class EnsinoResource
                                 ])
                                 ->searchable()
                                 ->required(),
-
                             TextInput::make('nome_lab_plataforma')->label('Nome do Laboratório/Plataforma')->required()->maxLength(255),
                             TextInput::make('registro_responsavel')->label('Registro Responsável')->maxLength(255),
                             TextInput::make('ano')
@@ -234,7 +224,8 @@ class EnsinoResource
                                 ->numeric()
                                 ->minValue(1900)
                                 ->maxValue($currentYear)
-                                ->maxLength(4),
+                                ->maxLength(4)
+                                ->rules(['nullable','integer','min:1900','max:'.$currentYear]),
                             TextInput::make('instituicao')->label('Instituição')->maxLength(255),
                         ])
                         ->columns(2)

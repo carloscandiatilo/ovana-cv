@@ -21,11 +21,11 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Cache;
+use App\Rules\AfterOrEqualField; // ← ADICIONADO
 
 class CurriculumResource extends Resource
 {
     protected static ?string $model = Curriculum::class;
-
     protected static ?string $navigationIcon = 'heroicon-o-document-text';
     protected static ?string $navigationGroup = 'Currículos';
     protected static ?string $label = 'Currículo';
@@ -53,11 +53,9 @@ class CurriculumResource extends Resource
     public static function getEloquentQuery(): Builder
     {
         $query = parent::getEloquentQuery();
-
         if (! Auth::user()?->can('visualizar_qualquer_curriculum')) {
             $query->where('user_id', Auth::id());
         }
-
         return $query;
     }
 
@@ -66,18 +64,15 @@ class CurriculumResource extends Resource
         return Cache::remember('all_countries', 3600, function () {
             try {
                 $response = Http::get('https://restcountries.com/v3.1/all?fields=name');
-
                 if (! $response->successful()) {
                     return [];
                 }
-
                 $countries = collect($response->json())
                     ->pluck('name.common')
                     ->unique()
                     ->sort()
                     ->values()
                     ->toArray();
-
                 return array_combine($countries, $countries);
             } catch (\Throwable $e) {
                 return [];
@@ -85,12 +80,12 @@ class CurriculumResource extends Resource
         });
     }
 
+    // REMOVIDO: greaterOrEqualToSiblingRule
+
     public static function getFormSchema(): array
     {
         $currentYear = date('Y');
-
         return [
-            // FOTO & STATUS
             Section::make('Foto & Status')
                 ->icon('heroicon-o-camera')
                 ->schema([
@@ -100,8 +95,11 @@ class CurriculumResource extends Resource
                         ->directory('curriculums/avatars')
                         ->visibility('public')
                         ->maxSize(2048)
-                        ->acceptedFileTypes(['image/jpeg', 'image/png']),
-
+                        ->acceptedFileTypes(['image/jpeg', 'image/png'])
+                        ->imageResizeMode('cover')
+                        ->extraAttributes([
+                            'class' => 'rounded-full w-32 h-32 overflow-hidden mx-auto',
+                        ]),
                     Select::make('status')
                         ->label('Status')
                         ->options([
@@ -110,12 +108,11 @@ class CurriculumResource extends Resource
                             'reprovado' => 'Reprovado',
                         ])
                         ->default('pendente')
-                        ->visible(fn () => Auth::user()?->can('editar_curriculum')),
+                        ->visible(fn (string $context) => $context === 'edit' && Auth::user()?->can('editar_curriculum')),
                 ])
                 ->columns(2)
                 ->saveRelationshipsWhenHidden(),
 
-            // DADOS PESSOAIS
             Section::make('Dados Pessoais')
                 ->icon('heroicon-o-user')
                 ->schema([
@@ -144,7 +141,6 @@ class CurriculumResource extends Resource
                 ->columns(2)
                 ->saveRelationshipsWhenHidden(),
 
-            // FORMAÇÕES ACADÊMICAS
             Section::make('Formações Acadêmicas')
                 ->icon('heroicon-o-academic-cap')
                 ->collapsed()
@@ -167,19 +163,20 @@ class CurriculumResource extends Resource
                                 ->maxLength(4)
                                 ->minValue(1900)
                                 ->maxValue($currentYear)
-                                ->reactive(),
+                                ->rules(['nullable','integer','min:1900','max:'.$currentYear]),
                             TextInput::make('ano_conclusao')
                                 ->label('Ano de Conclusão')
                                 ->numeric()
                                 ->maxLength(4)
                                 ->minValue(1900)
                                 ->maxValue($currentYear)
-                                ->reactive()
-                                ->afterStateUpdated(function ($state, callable $set, $get) {
-                                    if ($get('ano_inicio') && $state < $get('ano_inicio')) {
-                                        $set('ano_conclusao', $get('ano_inicio'));
-                                    }
-                                }),
+                                ->rules([
+                                    'nullable',
+                                    'integer',
+                                    'min:1900',
+                                    'max:'.$currentYear,
+                                    new AfterOrEqualField('ano_inicio', 'Ano de Início'),
+                                ]),
                             TextInput::make('titulo_monografia')->label('Título da Monografia')->maxLength(255),
                             TextInput::make('nome_orientador')->label('Orientador')->maxLength(255),
                             Select::make('pais')
@@ -193,7 +190,6 @@ class CurriculumResource extends Resource
                 ])
                 ->saveRelationshipsWhenHidden(),
 
-            // FORMAÇÕES COMPLEMENTARES
             Section::make('Formações Complementares')
                 ->icon('heroicon-o-book-open')
                 ->collapsed()
@@ -207,7 +203,8 @@ class CurriculumResource extends Resource
                                 ->numeric()
                                 ->maxLength(4)
                                 ->minValue(1900)
-                                ->maxValue($currentYear),
+                                ->maxValue($currentYear)
+                                ->rules(['nullable','integer','min:1900','max:'.$currentYear]),
                             TextInput::make('carga_horaria')->label('Carga Horária (h)')->numeric()->minValue(1),
                             Select::make('pais')
                                 ->label('País')
@@ -220,7 +217,6 @@ class CurriculumResource extends Resource
                 ])
                 ->saveRelationshipsWhenHidden(),
 
-            // PRÊMIOS
             Section::make('Prêmios')
                 ->icon('heroicon-o-trophy')
                 ->collapsed()
@@ -233,7 +229,8 @@ class CurriculumResource extends Resource
                                 ->label('Ano')
                                 ->numeric()
                                 ->minValue(1900)
-                                ->maxValue($currentYear),
+                                ->maxValue($currentYear)
+                                ->rules(['nullable','integer','min:1900','max:'.$currentYear]),
                             Select::make('pais')
                                 ->label('País')
                                 ->searchable()
@@ -245,7 +242,6 @@ class CurriculumResource extends Resource
                 ])
                 ->saveRelationshipsWhenHidden(),
 
-            // ATUAÇÃO PROFISSIONAL
             Section::make('Atuação Profissional')
                 ->icon('heroicon-o-briefcase')
                 ->collapsed()
@@ -269,19 +265,20 @@ class CurriculumResource extends Resource
                                 ->maxLength(4)
                                 ->minValue(1900)
                                 ->maxValue($currentYear)
-                                ->reactive(),
+                                ->rules(['nullable','integer','min:1900','max:'.$currentYear]),
                             TextInput::make('ano_fim')
                                 ->label('Ano de Fim')
                                 ->numeric()
                                 ->maxLength(4)
                                 ->minValue(1900)
                                 ->maxValue($currentYear)
-                                ->reactive()
-                                ->afterStateUpdated(function ($state, callable $set, $get) {
-                                    if ($get('ano_inicio') && $state < $get('ano_inicio')) {
-                                        $set('ano_fim', $get('ano_inicio'));
-                                    }
-                                }),
+                                ->rules([
+                                    'nullable',
+                                    'integer',
+                                    'min:1900',
+                                    'max:'.$currentYear,
+                                    new AfterOrEqualField('ano_inicio', 'Ano de Início'),
+                                ]),
                             Select::make('pais')
                                 ->label('País')
                                 ->searchable()
@@ -293,7 +290,6 @@ class CurriculumResource extends Resource
                 ])
                 ->saveRelationshipsWhenHidden(),
 
-            // DOCÊNCIA
             Section::make('Docência')
                 ->icon('heroicon-o-user')
                 ->collapsed()
@@ -308,14 +304,14 @@ class CurriculumResource extends Resource
                                 ->label('Ano')
                                 ->numeric()
                                 ->minValue(1900)
-                                ->maxValue($currentYear),
+                                ->maxValue($currentYear)
+                                ->rules(['nullable','integer','min:1900','max:'.$currentYear]),
                         ])
                         ->columns(2)
                         ->createItemButtonLabel('Adicionar Docência'),
                 ])
                 ->saveRelationshipsWhenHidden(),
 
-            // INVESTIGAÇÃO CIENTÍFICA
             Section::make('Investigação Científica')
                 ->icon('heroicon-o-magnifying-glass')
                 ->collapsed()
@@ -341,26 +337,26 @@ class CurriculumResource extends Resource
                                 ->maxLength(4)
                                 ->minValue(1900)
                                 ->maxValue($currentYear)
-                                ->reactive(),
+                                ->rules(['nullable','integer','min:1900','max:'.$currentYear]),
                             TextInput::make('ano_fim')
                                 ->label('Ano de Fim')
                                 ->numeric()
                                 ->maxLength(4)
                                 ->minValue(1900)
                                 ->maxValue($currentYear)
-                                ->reactive()
-                                ->afterStateUpdated(function ($state, callable $set, $get) {
-                                    if ($get('ano_inicio') && $state < $get('ano_inicio')) {
-                                        $set('ano_fim', $get('ano_inicio'));
-                                    }
-                                }),
+                                ->rules([
+                                    'nullable',
+                                    'integer',
+                                    'min:1900',
+                                    'max:'.$currentYear,
+                                    new AfterOrEqualField('ano_inicio', 'Ano de Início'),
+                                ]),
                         ])
                         ->columns(2)
                         ->createItemButtonLabel('Adicionar Investigação'),
                 ])
                 ->saveRelationshipsWhenHidden(),
 
-            // EXTENSÃO UNIVERSITÁRIA
             Section::make('Extensão Universitária')
                 ->icon('heroicon-o-building-library')
                 ->collapsed()
@@ -371,26 +367,26 @@ class CurriculumResource extends Resource
                             TextInput::make('instituicao')->label('Instituição')->maxLength(255),
                             TextInput::make('projeto_extensao')->label('Projeto de Extensão')->maxLength(255),
                             TextInput::make('membros_equipa')->label('Membros da Equipa')->maxLength(255),
-                            TextInput::make('ano_inicio')->label('Ano de Início')->numeric()->minValue(1900)->maxValue($currentYear)->reactive(),
+                            TextInput::make('ano_inicio')->label('Ano de Início')->numeric()->minValue(1900)->maxValue($currentYear)->maxLength(4)->rules(['nullable','integer','min:1900','max:'.$currentYear]),
                             TextInput::make('ano_fim')
                                 ->label('Ano de Fim')
                                 ->numeric()
                                 ->maxLength(4)
                                 ->minValue(1900)
                                 ->maxValue($currentYear)
-                                ->reactive()
-                                ->afterStateUpdated(function ($state, callable $set, $get) {
-                                    if ($get('ano_inicio') && $state < $get('ano_inicio')) {
-                                        $set('ano_fim', $get('ano_inicio'));
-                                    }
-                                }),
+                                ->rules([
+                                    'nullable',
+                                    'integer',
+                                    'min:1900',
+                                    'max:'.$currentYear,
+                                    new AfterOrEqualField('ano_inicio', 'Ano de Início'),
+                                ]),
                         ])
                         ->columns(2)
                         ->createItemButtonLabel('Adicionar Extensão'),
                 ])
                 ->saveRelationshipsWhenHidden(),
 
-            // CAPTAÇÃO DE FINANCIAMENTO
             Section::make('Captação de Financiamento')
                 ->icon('heroicon-o-banknotes')
                 ->collapsed()
@@ -402,19 +398,20 @@ class CurriculumResource extends Resource
                             TextInput::make('nome_projeto')->label('Nome do Projeto')->maxLength(255),
                             TextInput::make('natureza_projeto')->label('Natureza do Projeto')->maxLength(255),
                             TextInput::make('codigo_registro')->label('Código de Registro')->maxLength(255),
-                            TextInput::make('ano_inicio')->label('Ano de Início')->numeric()->minValue(1900)->maxValue($currentYear)->reactive(),
+                            TextInput::make('ano_inicio')->label('Ano de Início')->numeric()->minValue(1900)->maxValue($currentYear)->maxLength(4)->rules(['nullable','integer','min:1900','max:'.$currentYear]),
                             TextInput::make('ano_fim')
                                 ->label('Ano de Fim')
                                 ->numeric()
                                 ->maxLength(4)
                                 ->minValue(1900)
                                 ->maxValue($currentYear)
-                                ->reactive()
-                                ->afterStateUpdated(function ($state, callable $set, $get) {
-                                    if ($get('ano_inicio') && $state < $get('ano_inicio')) {
-                                        $set('ano_fim', $get('ano_inicio'));
-                                    }
-                                }),
+                                ->rules([
+                                    'nullable',
+                                    'integer',
+                                    'min:1900',
+                                    'max:'.$currentYear,
+                                    new AfterOrEqualField('ano_inicio', 'Ano de Início'),
+                                ]),
                             TextInput::make('membros_equipa')->label('Membros da Equipa')->maxLength(255),
                             TextInput::make('valor_arrecadado')->label('Valor Arrecadado')->numeric()->minValue(0),
                         ])

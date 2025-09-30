@@ -22,7 +22,7 @@ return new class extends Migration
             $table->string('instituicao')->nullable();
             $table->string('orgao_tutela')->nullable();
             $table->string('funcao')->nullable();
-            $table->year('ano')->nullable();
+            $table->integer('ano')->nullable();
             $table->timestamps();
         });
 

@@ -8,14 +8,39 @@ use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Textarea;
-use Filament\Forms\Components\DatePicker;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Http;
+use App\Rules\AfterOrEqualField; // ← Adicionado para consistência e futuro uso
 
 class InvestigacaoResource
 {
+    /**
+     * Retorna opções de país via API REST ou cache
+     */
+    public static function getCountryOptions(): array
+    {
+        return Cache::remember('all_countries', 3600, function () {
+            try {
+                $response = Http::get('https://restcountries.com/v3.1/all?fields=name');
+                if (! $response->successful()) {
+                    return [];
+                }
+                $countries = collect($response->json())
+                    ->pluck('name.common')
+                    ->unique()
+                    ->sort()
+                    ->values()
+                    ->toArray();
+                return array_combine($countries, $countries);
+            } catch (\Throwable $e) {
+                return [];
+            }
+        });
+    }
+
     public static function getFormSchema(): array
     {
         $currentYear = date('Y');
-
         return [
             Section::make('Produção Científica')
                 ->description('Registos de produção científica')
@@ -60,10 +85,16 @@ class InvestigacaoResource
                                 ->minValue(1900)
                                 ->maxValue($currentYear)
                                 ->minLength(4)
-                                ->maxLength(4),
+                                ->maxLength(4)
+                                ->rules(['nullable','integer','min:1900','max:'.$currentYear]),
                             TextInput::make('coautor'),
                             TextInput::make('registro'),
                             TextInput::make('editora'),
+                            Select::make('pais')
+                                ->label('País')
+                                ->searchable()
+                                ->options(fn() => self::getCountryOptions())
+                                ->required(),
                         ])
                         ->columns(2),
                 ]),
@@ -96,16 +127,21 @@ class InvestigacaoResource
                                     'Novos processos e procedimentos desenvolvidos e registados'=>'Novos processos e procedimentos desenvolvidos e registados',
                                 ]),
                             TextInput::make('nome_producao')->required(),
-                            TextInput::make('pais'),
+                            TextInput::make('registro'),
+                            TextInput::make('coautor'),
                             TextInput::make('ano')
                                 ->label('Ano')
                                 ->numeric()
                                 ->minValue(1900)
                                 ->maxValue($currentYear)
                                 ->minLength(4)
-                                ->maxLength(4),
-                            TextInput::make('registro'),
-                            TextInput::make('coautor'),
+                                ->maxLength(4)
+                                ->rules(['nullable','integer','min:1900','max:'.$currentYear]),
+                            Select::make('pais')
+                                ->label('País')
+                                ->searchable()
+                                ->options(fn() => self::getCountryOptions())
+                                ->required(),
                         ])
                         ->columns(2),
                 ]),
@@ -134,11 +170,23 @@ class InvestigacaoResource
                                     'Avaliador de projectos de investigação científica nacional'=>'Avaliador de projectos de investigação científica nacional',
                                     'Participante em projecto de I&D nacional'=>'Participante em projecto de I&D nacional',
                                 ]),
-                            TextInput::make('nome_projecto')->required(),
-                            Textarea::make('objectivo'),
-                            TextInput::make('instituicao'),
-                            TextInput::make('membros_equipa'),
-                            DatePicker::make('inicio')->required(),
+                            TextInput::make('nome_projecto')->label('Nome Projecto')->required(),
+                            Textarea::make('objectivo')->label('Objectivo'),
+                            TextInput::make('instituicao')->label('Instituição'),
+                            TextInput::make('membros_equipa')->label('Membros da Equipa'),
+                            TextInput::make('inicio')
+                                ->label('Ano Início')
+                                ->numeric()
+                                ->minValue(1900)
+                                ->maxValue($currentYear)
+                                ->minLength(4)
+                                ->maxLength(4)
+                                ->rules(['nullable','integer','min:1900','max:'.$currentYear]),
+                            Select::make('pais')
+                                ->label('País')
+                                ->searchable()
+                                ->options(fn() => self::getCountryOptions())
+                                ->required(),
                         ])
                         ->columns(2),
                 ]),
@@ -150,7 +198,7 @@ class InvestigacaoResource
                     Repeater::make('infraestruturasinvestigacaos')
                         ->relationship('infraestruturasinvestigacaos')
                         ->schema([
-                            TextInput::make('instituicao')->required(),
+                            TextInput::make('instituicao')->label('Instituição')->required(),
                             Select::make('tipo_infraestrutura')
                                 ->label('Tipo de Infra-Estrutura')
                                 ->required()
@@ -161,16 +209,22 @@ class InvestigacaoResource
                                     'Participante na criação de laboratório de apoio à investigação científica'=>'Participante na criação de laboratório de apoio à investigação científica',
                                     'Participante no reforço de laboratório de apoio à investigação científica'=>'Participante no reforço de laboratório de apoio à investigação científica',
                                 ]),
-                            TextInput::make('laboratorio')->required(),
-                            TextInput::make('nome_responsavel')->required(),
-                            TextInput::make('registro'),
+                            TextInput::make('laboratorio')->label('Laboratório')->required(),
+                            TextInput::make('nome_responsavel')->label('Nome do Responsável')->required(),
+                            TextInput::make('registro')->label('Registro'),
                             TextInput::make('ano')
                                 ->label('Ano')
                                 ->numeric()
                                 ->minValue(1900)
                                 ->maxValue($currentYear)
                                 ->minLength(4)
-                                ->maxLength(4),
+                                ->maxLength(4)
+                                ->rules(['nullable','integer','min:1900','max:'.$currentYear]),
+                            Select::make('pais')
+                                ->label('País')
+                                ->searchable()
+                                ->options(fn() => self::getCountryOptions())
+                                ->required(),
                         ])
                         ->columns(2),
                 ]),
@@ -182,7 +236,6 @@ class InvestigacaoResource
                     Repeater::make('reconhecimentocomunidadecientificos')
                         ->relationship('reconhecimentocomunidadecientificos')
                         ->schema([
-                            TextInput::make('pais')->required(),
                             Select::make('tipo_reconhecimento')
                                 ->label('Tipo de Reconhecimento')
                                 ->required()
@@ -209,10 +262,15 @@ class InvestigacaoResource
                                     'Participação em comissões científicas de eventos científicos nacionais'=>'Participação em comissões científicas de eventos científicos nacionais',
                                     'Actividades editoriais em outras publicações científicas'=>'Actividades editoriais em outras publicações científicas',
                                 ]),
-                            TextInput::make('reconhecimento')->required(),
-                            TextInput::make('entidade_responsavel'),
-                            TextInput::make('classificacao'),
-                            TextInput::make('tipo_premio'),
+                            TextInput::make('reconhecimento')->label('Reconhecimento')->required(),
+                            TextInput::make('entidade_responsavel')->label('Entidade Responsável'),
+                            TextInput::make('classificacao')->label('Classificação'),
+                            TextInput::make('tipo_premio')->label('Tipo de Prémio'),
+                            Select::make('pais')
+                                ->label('País')
+                                ->searchable()
+                                ->options(fn() => self::getCountryOptions())
+                                ->required(),
                         ])
                         ->columns(2),
                 ]),

@@ -16,7 +16,7 @@ return new class extends Migration
             $table->foreignId('curriculum_id')->constrained('curriculums')->cascadeOnDelete();
             $table->string('tipo_producao');
             $table->string('titulo');
-            $table->year('ano_publicacao')->nullable();
+            $table->integer('ano_publicacao')->nullable();
             $table->string('coautor')->nullable();
             $table->string('registro')->nullable();
             $table->string('editora')->nullable();

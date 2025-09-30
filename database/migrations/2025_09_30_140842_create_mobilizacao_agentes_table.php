@@ -18,11 +18,11 @@ return new class extends Migration
             $table->string('instituicao_parceira')->nullable();
             $table->string('local_actividade')->nullable();
             $table->string('nome_mecanismo')->nullable();
-            $table->year('ano')->nullable();
+            $table->integer('ano')->nullable();
             $table->string('coordenador_protocolo')->nullable();
             $table->string('instituicao')->nullable();
-            $table->year('inicio')->nullable();
-            $table->year('fim')->nullable();
+            $table->integer('inicio')->nullable();
+            $table->integer('fim')->nullable();
             $table->string('instituicoes_envolvidas')->nullable();
             $table->timestamps();
         });

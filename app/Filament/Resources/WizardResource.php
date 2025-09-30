@@ -35,8 +35,14 @@ class WizardResource extends Resource
                 Forms\Components\Wizard\Step::make('Dados de Ensino')
                     ->icon('heroicon-o-academic-cap')
                     ->schema(EnsinoResource::getFormSchema()),
+
+                // Passo 3: Investigação
+                Forms\Components\Wizard\Step::make('Investigação Científica')
+                    ->icon('heroicon-o-users')
+                    ->schema(\App\Filament\Resources\InvestigacaoResource::getFormSchema()),
+
             ])
-            ->skippable(true) // pode avançar livremente ao editar ou visualizar
+            ->skippable(true)
             ->columnSpanFull(),
         ]);
     }

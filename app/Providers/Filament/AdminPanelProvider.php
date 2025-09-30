@@ -17,6 +17,7 @@ use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
 use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\Session\Middleware\StartSession;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
+use Filament\Facades\Filament;
 
 class AdminPanelProvider extends PanelProvider
 {
@@ -28,9 +29,16 @@ class AdminPanelProvider extends PanelProvider
             ->path('admin')
             ->login()
             ->sidebarCollapsibleOnDesktop()
-            ->colors([
-                'primary' => Color::Amber,
+            ->brandLogo(asset('images/logo-dark.jpg'))
+           ->colors([
+                'primary' => Color::Slate,
             ])
+            ->viteTheme(
+                app()->environment('local')
+                    ? 'resources/css/filament/admin/theme.css' 
+                    : 'build/assets/theme.css' 
+            )
+            
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\\Filament\\Resources')
             ->discoverPages(in: app_path('Filament/Pages'), for: 'App\\Filament\\Pages')
             ->pages([

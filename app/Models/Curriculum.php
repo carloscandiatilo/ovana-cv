@@ -59,6 +59,26 @@ class Curriculum extends Model
     public function leccionacoes() { return $this->hasMany(Leccionacao::class); }
     public function infraestrutura_ensinos() { return $this->hasMany(InfraestruturaEnsino::class); }
 
+    //PASSO 3
+    public function producaocientificas() { return $this->hasMany(ProducaoCientifica::class); }
+    public function producaotecnologicas() { return $this->hasMany(ProducaoTecnologica::class); }
+    public function projectoinvestigacaos() { return $this->hasMany(ProjectoInvestigacao::class); }
+    public function infraestruturasinvestigacaos() { return $this->hasMany(InfraestruturaInvestigacao::class); }
+    public function reconhecimentocomunidadecientificos() { return $this->hasMany(ReconhecimentoComunidadeCientifico::class); }
+
+    //PASSO 4
+    public function producaonormativas() { return $this->hasMany(ProducaoNormativa::class); }
+    public function prestacaoservicos() { return $this->hasMany(PrestacaoServico::class); }
+    public function interaccoescomunidade() { return $this->hasMany(InteracaoComunidade::class); }
+    public function mobilizacoesagente() { return $this->hasMany(MobilizacaoAgente::class); }
+
+    //PASSO 5
+    public function cargounidadeorganicas() { return $this->hasMany(CargoUnidadeOrganica::class); }
+    public function cargonivelunidades() { return $this->hasMany(CargoNivelUnidade::class); }
+    public function cargotarefastemporarias() { return $this->hasMany(CargoTarefasTemporaria::class); }
+    public function cargoorgaosexternos() { return $this->hasMany(CargoOrgaoExterno::class); }
+
+
     public function scopeAprovado($query)
     {
         return $query->where('status', 'aprovado');

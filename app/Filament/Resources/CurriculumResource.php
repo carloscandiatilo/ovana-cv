@@ -147,6 +147,7 @@ class CurriculumResource extends Resource
             // FORMAÇÕES ACADÊMICAS
             Section::make('Formações Acadêmicas')
                 ->icon('heroicon-o-academic-cap')
+                ->collapsed()
                 ->schema([
                     Repeater::make('formacoes_academicas')
                         ->schema([
@@ -195,6 +196,7 @@ class CurriculumResource extends Resource
             // FORMAÇÕES COMPLEMENTARES
             Section::make('Formações Complementares')
                 ->icon('heroicon-o-book-open')
+                ->collapsed()
                 ->schema([
                     Repeater::make('formacoes_complementares')
                         ->schema([
@@ -221,6 +223,7 @@ class CurriculumResource extends Resource
             // PRÊMIOS
             Section::make('Prêmios')
                 ->icon('heroicon-o-trophy')
+                ->collapsed()
                 ->schema([
                     Repeater::make('premios')
                         ->schema([
@@ -245,6 +248,7 @@ class CurriculumResource extends Resource
             // ATUAÇÃO PROFISSIONAL
             Section::make('Atuação Profissional')
                 ->icon('heroicon-o-briefcase')
+                ->collapsed()
                 ->schema([
                     Repeater::make('actuacoes_profissionais')
                         ->schema([
@@ -292,6 +296,7 @@ class CurriculumResource extends Resource
             // DOCÊNCIA
             Section::make('Docência')
                 ->icon('heroicon-o-user')
+                ->collapsed()
                 ->schema([
                     Repeater::make('actuacoes_docencias')
                         ->schema([
@@ -313,6 +318,7 @@ class CurriculumResource extends Resource
             // INVESTIGAÇÃO CIENTÍFICA
             Section::make('Investigação Científica')
                 ->icon('heroicon-o-magnifying-glass')
+                ->collapsed()
                 ->schema([
                     Repeater::make('investigacoes_cientificas')
                         ->schema([
@@ -357,6 +363,7 @@ class CurriculumResource extends Resource
             // EXTENSÃO UNIVERSITÁRIA
             Section::make('Extensão Universitária')
                 ->icon('heroicon-o-building-library')
+                ->collapsed()
                 ->schema([
                     Repeater::make('extensoes_universitarias')
                         ->schema([
@@ -386,6 +393,7 @@ class CurriculumResource extends Resource
             // CAPTAÇÃO DE FINANCIAMENTO
             Section::make('Captação de Financiamento')
                 ->icon('heroicon-o-banknotes')
+                ->collapsed()
                 ->schema([
                     Repeater::make('captacoes_financiamentos')
                         ->schema([

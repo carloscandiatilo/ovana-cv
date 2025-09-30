@@ -20,7 +20,7 @@ class WizardResource extends Resource
     protected static ?string $navigationIcon = 'heroicon-o-document-text';
     protected static ?string $navigationGroup = 'Currículos';
     protected static ?string $label = 'Currículo';
-    protected static ?int $navigationSort = -1; // Topo do menu
+    protected static ?int $navigationSort = -1;
 
     public static function form(Form $form): Form
     {
@@ -35,8 +35,23 @@ class WizardResource extends Resource
                 Forms\Components\Wizard\Step::make('Dados de Ensino')
                     ->icon('heroicon-o-academic-cap')
                     ->schema(EnsinoResource::getFormSchema()),
+
+                // Passo 3: Investigação
+                Forms\Components\Wizard\Step::make('Investigação Científica')
+                    ->icon('heroicon-o-magnifying-glass')
+                    ->schema(\App\Filament\Resources\InvestigacaoResource::getFormSchema()),
+
+                Forms\Components\Wizard\Step::make('Extensão')
+                    ->icon('heroicon-o-globe-alt')
+                    ->schema(\App\Filament\Resources\ExtensaoResource::getFormSchema()),
+
+                Forms\Components\Wizard\Step::make('Gestão')
+                    ->icon('heroicon-o-briefcase')
+                    ->schema(\App\Filament\Resources\GestaoResource::getFormSchema()),
+
+
             ])
-            ->skippable(true) // pode avançar livremente ao editar ou visualizar
+            ->skippable(true)
             ->columnSpanFull(),
         ]);
     }

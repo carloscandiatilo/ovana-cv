@@ -41,6 +41,15 @@ class WizardResource extends Resource
                     ->icon('heroicon-o-users')
                     ->schema(\App\Filament\Resources\InvestigacaoResource::getFormSchema()),
 
+                Forms\Components\Wizard\Step::make('Extensão')
+                    ->icon('heroicon-o-users')
+                    ->schema(\App\Filament\Resources\ExtensaoResource::getFormSchema()),
+
+                Forms\Components\Wizard\Step::make('Gestão')
+                    ->icon('heroicon-o-briefcase')
+                    ->schema(\App\Filament\Resources\GestaoResource::getFormSchema()),
+
+
             ])
             ->skippable(true)
             ->columnSpanFull(),

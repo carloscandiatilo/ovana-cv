@@ -66,6 +66,18 @@ class Curriculum extends Model
     public function infraestruturasinvestigacaos() { return $this->hasMany(InfraestruturaInvestigacao::class); }
     public function reconhecimentocomunidadecientificos() { return $this->hasMany(ReconhecimentoComunidadeCientifico::class); }
 
+    //PASSO 4
+    public function producaonormativas() { return $this->hasMany(ProducaoNormativa::class); }
+    public function prestacaoservicos() { return $this->hasMany(PrestacaoServico::class); }
+    public function interaccoescomunidade() { return $this->hasMany(InteracaoComunidade::class); }
+    public function mobilizacoesagente() { return $this->hasMany(MobilizacaoAgente::class); }
+
+    //PASSO 5
+    public function cargounidadeorganicas() { return $this->hasMany(CargoUnidadeOrganica::class); }
+    public function cargonivelunidades() { return $this->hasMany(CargoNivelUnidade::class); }
+    public function cargotarefastemporarias() { return $this->hasMany(CargoTarefasTemporaria::class); }
+    public function cargoorgaosexternos() { return $this->hasMany(CargoOrgaoExterno::class); }
+
 
     public function scopeAprovado($query)
     {

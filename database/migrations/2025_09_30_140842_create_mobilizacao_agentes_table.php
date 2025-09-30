@@ -21,8 +21,8 @@ return new class extends Migration
             $table->year('ano')->nullable();
             $table->string('coordenador_protocolo')->nullable();
             $table->string('instituicao')->nullable();
-            $table->date('inicio')->nullable();
-            $table->date('fim')->nullable();
+            $table->year('inicio')->nullable();
+            $table->year('fim')->nullable();
             $table->string('instituicoes_envolvidas')->nullable();
             $table->timestamps();
         });

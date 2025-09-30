@@ -20,7 +20,7 @@ class WizardResource extends Resource
     protected static ?string $navigationIcon = 'heroicon-o-document-text';
     protected static ?string $navigationGroup = 'Currículos';
     protected static ?string $label = 'Currículo';
-    protected static ?int $navigationSort = -1; // Topo do menu
+    protected static ?int $navigationSort = -1;
 
     public static function form(Form $form): Form
     {
@@ -38,11 +38,11 @@ class WizardResource extends Resource
 
                 // Passo 3: Investigação
                 Forms\Components\Wizard\Step::make('Investigação Científica')
-                    ->icon('heroicon-o-users')
+                    ->icon('heroicon-o-magnifying-glass')
                     ->schema(\App\Filament\Resources\InvestigacaoResource::getFormSchema()),
 
                 Forms\Components\Wizard\Step::make('Extensão')
-                    ->icon('heroicon-o-users')
+                    ->icon('heroicon-o-globe-alt')
                     ->schema(\App\Filament\Resources\ExtensaoResource::getFormSchema()),
 
                 Forms\Components\Wizard\Step::make('Gestão')

@@ -21,13 +21,12 @@
                     </div>
                 </div>
             </div>
-            <div class="header-mid gray-bg">
+            <!-- <div class="header-mid gray-bg">
                 <div class="container">
                     <div class="row d-flex align-items-center">
                         <div class="col-xl-3 col-lg-3 col-md-3 d-none d-md-block">
                             <div class="logo">
-                                <!-- <a href="{{ url('/') }}"><img src="{{ asset('assets/img/logo/logo.png') }}" alt=""></a> -->
-                                 <h2>OVANA - O SEU CV</h2>
+                              <h2>OVANA - O SEU CV</h2>
                             </div>
                         </div>
                         <div class="col-xl-9 col-lg-9 col-md-9">
@@ -37,7 +36,7 @@
                         </div>
                     </div>
                 </div>
-            </div>
+            </div> -->
             <div class="header-bottom header-sticky">
                 <div class="container">
                     <div class="row align-items-center">
@@ -49,10 +48,10 @@
                                 <nav>
                                     <ul id="navigation">
                                         <li><a href="{{ url('/') }}">Inicio</a></li>
-                                        <li><a href="{{ url('/about') }}">Sobre</a></li>
-                                        <li><a href="{{ url('/procurar-perfil') }}">Procurar Curriculum</a></li>
-                                        <li><a href="{{ url('/latest-news') }}">Notícias</a></li>
-                                        <li><a href="{{ url('/contact') }}">Contacto</a></li>
+                                        <li><a href="{{ url('/sobre') }}">Sobre</a></li>
+                                        <li><a href="{{ url('/curriculum') }}">Procurar Curriculum</a></li>
+                                        <li><a href="{{ url('/latest-news') }}">Estatisticas</a></li>
+                                        <li><a href="{{ url('/contacto') }}">Contacto</a></li>
                                     </ul>
                                 </nav>
                             </div>

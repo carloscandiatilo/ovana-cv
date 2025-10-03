@@ -3,74 +3,98 @@
     <div class="container">
         <div class="trending-main">
             <div class="row">
-                <div class="col-lg-8">
-                    <div class="slider-active">
-                        <div class="single-slider">
-                            <div class="trending-top mb-30">
-                                <div class="trend-top-img">
-                                    <img src="{{ asset('assets/img/trending/trending_top2.jpg') }}" alt="">
-                                    <div class="trend-top-cap">
-                                        <span class="bgr" data-animation="fadeInUp" data-delay=".2s" data-duration="1000ms">Business</span>
-                                        <h2><a href="{{ url('/latest-news') }}" data-animation="fadeInUp" data-delay=".4s" data-duration="1000ms">Anna Lora Stuns In White At Her Australian Premiere</a></h2>
-                                        <p data-animation="fadeInUp" data-delay=".6s" data-duration="1000ms">by Alice cloe   -   Jun 19, 2020</p>
+                @if($destaqueNews->isNotEmpty())
+                    <!-- Slider principal (col-lg-8) -->
+                    <div class="col-lg-8">
+                        <div class="slider-active">
+                            @foreach($destaqueNews->take(3) as $news)
+                                <div class="single-slider">
+                                    <div class="trending-top mb-30">
+                                        <div class="trend-top-img">
+                                            <img 
+                                                src="{{ $news->media ? asset('storage/' . $news->media) : asset('assets/img/trending/trending_default.jpg') }}" 
+                                                alt="{{ $news->title }}" 
+                                                style="width:100%; height:400px; object-fit:cover;"
+                                            >
+                                            <div class="trend-top-cap">
+                                                <span class="bgr">{{ $news->category?->name ?? 'Sem categoria' }}</span>
+                                                <span class="badge bg-danger ms-2">Destaque</span>
+                                                <h2>
+                                                    <a href="{{ route('news.show', $news->id) }}">
+                                                        {{ Str::limit($news->title, 80) }}
+                                                    </a>
+                                                </h2>
+                                                <p>
+                                                    by {{ $news->user?->name ?? 'Anônimo' }} 
+                                                    - {{ $news->created_at->format('d M, Y') }}
+                                                </p>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
-                        </div>
-                        <div class="single-slider">
-                            <div class="trending-top mb-30">
-                                <div class="trend-top-img">
-                                    <img src="{{ asset('assets/img/trending/trending_top02.jpg') }}" alt="">
-                                    <div class="trend-top-cap">
-                                        <span class="bgr" data-animation="fadeInUp" data-delay=".2s" data-duration="1000ms">Business</span>
-                                        <h2><a href="{{ url('/latest-news') }}" data-animation="fadeInUp" data-delay=".4s" data-duration="1000ms">Anna Lora Stuns In White At Her Australian Premiere</a></h2>
-                                        <p data-animation="fadeInUp" data-delay=".6s" data-duration="1000ms">by Alice cloe   -   Jun 19, 2020</p>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="single-slider">
-                            <div class="trending-top mb-30">
-                                <div class="trend-top-img">
-                                    <img src="{{ asset('assets/img/trending/trending_top03.jpg') }}" alt="">
-                                    <div class="trend-top-cap">
-                                        <span class="bgr" data-animation="fadeInUp" data-delay=".2s" data-duration="1000ms">Business</span>
-                                        <h2><a href="{{ url('/latest-news') }}" data-animation="fadeInUp" data-delay=".4s" data-duration="1000ms">Anna Lora Stuns In White At Her Australian Premiere</a></h2>
-                                        <p data-animation="fadeInUp" data-delay=".6s" data-duration="1000ms">by Alice cloe   -   Jun 19, 2020</p>
-                                    </div>
-                                </div>
-                            </div>
+                            @endforeach
                         </div>
                     </div>
-                </div>
-                <div class="col-lg-4">
-                    <div class="row">
-                        <div class="col-lg-12 col-md-6 col-sm-6">
-                            <div class="trending-top mb-30">
-                                <div class="trend-top-img">
-                                    <img src="{{ asset('assets/img/trending/trending_top3.jpg') }}" alt="">
-                                    <div class="trend-top-cap trend-top-cap2">
-                                        <span class="bgb">FASHION</span>
-                                        <h2><a href="{{ url('/latest-news') }}">Secretart for Economic Air plane that looks like</a></h2>
-                                        <p>by Alice cloe   -   Jun 19, 2020</p>
+
+                    <!-- Destaques menores (col-lg-4) -->
+                    <div class="col-lg-4">
+                        <div class="row">
+                            @php
+                                $smallNews = $destaqueNews->skip(3)->take(2);
+                            @endphp
+
+                            @foreach($smallNews as $news)
+                                <div class="col-lg-12 col-md-6 col-sm-6">
+                                    <div class="trending-top mb-30">
+                                        <div class="trend-top-img">
+                                            <img 
+                                                src="{{ $news->media ? asset('storage/' . $news->media) : asset('assets/img/trending/trending_default.jpg') }}" 
+                                                alt="{{ $news->title }}"
+                                                style="width:100%; height:200px; object-fit:cover;"
+                                            >
+                                            <div class="trend-top-cap trend-top-cap2">
+                                                <span class="bgb">{{ $news->category?->name ?? 'Sem categoria' }}</span>
+                                                <h2>
+                                                    <a href="{{ route('news.show', $news->id) }}">
+                                                        {{ Str::limit($news->title, 50) }}
+                                                    </a>
+                                                </h2>
+                                                <p>
+                                                    by {{ $news->user?->name ?? 'Anônimo' }} 
+                                                    - {{ $news->created_at->format('d M, Y') }}
+                                                </p>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
-                        </div>
-                        <div class="col-lg-12 col-md-6 col-sm-6">
-                            <div class="trending-top mb-30">
-                                <div class="trend-top-img">
-                                    <img src="{{ asset('assets/img/trending/trending_top4.jpg') }}" alt="">
-                                    <div class="trend-top-cap trend-top-cap2">
-                                        <span class="bgg">TECH </span>
-                                        <h2><a href="{{ url('/latest-news') }}">Secretart for Economic Air plane that looks like</a></h2>
-                                        <p>by Alice cloe   -   Jun 19, 2020</p>
+                            @endforeach
+
+                            {{-- Preenche com placeholders SOMENTE se houver menos de 2 notícias na col-lg-4 --}}
+                            @for($i = 0; $i < (2 - $smallNews->count()); $i++)
+                                <div class="col-lg-12 col-md-6 col-sm-6">
+                                    <div class="trending-top mb-30">
+                                        <div class="trend-top-img">
+                                            <img 
+                                                src="{{ asset('assets/img/trending/trending_default.jpg') }}" 
+                                                alt="Notícia padrão"
+                                                style="width:100%; height:200px; object-fit:cover;"
+                                            >
+                                            <div class="trend-top-cap trend-top-cap2">
+                                                <span class="bgr">Categoria</span>
+                                                <h2><a href="#">Notícia de destaque</a></h2>
+                                                <p>by Admin - {{ now()->format('d M, Y') }}</p>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
+                            @endfor
                         </div>
                     </div>
-                </div>
+                @else
+                    <div class="col-12 text-center py-5">
+                        <p class="text-muted">Nenhuma notícia de destaque publicada no momento.</p>
+                    </div>
+                @endif
             </div>
         </div>
     </div>

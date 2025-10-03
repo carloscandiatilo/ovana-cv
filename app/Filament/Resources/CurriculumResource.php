@@ -105,7 +105,7 @@ class CurriculumResource extends Resource
                         ->options([
                             'pendente'  => 'Pendente',
                             'aprovado'  => 'Aprovado',
-                            'reprovado' => 'Reprovado',
+                            'rejeitado' => 'rejeitado',
                         ])
                         ->default('pendente')
                         ->visible(fn (string $context) => $context === 'edit' && Auth::user()?->can('editar_curriculum')),
@@ -432,7 +432,7 @@ class CurriculumResource extends Resource
         return $table
             ->columns([
                 ImageColumn::make('avatar')->label('Foto')->circular()->toggleable(false),
-                TextColumn::make('status')->label('Status')->badge()->color(fn(?string $state)=>match($state){'aprovado'=>'success','reprovado'=>'danger',default=>'warning'}),
+                TextColumn::make('status')->label('Status')->badge()->color(fn(?string $state)=>match($state){'aprovado'=>'success','rejeitado'=>'danger',default=>'warning'}),
                 TextColumn::make('pessoal.nome')->label('Nome')->getStateUsing(fn(Curriculum $r)=>$r->pessoal['nome']??'N/A')->searchable()->sortable(),
                 TextColumn::make('pessoal.email_pessoal')->label('Email Pessoal')->getStateUsing(fn(Curriculum $r)=>$r->pessoal['email_pessoal']??null)->wrap(),
                 TextColumn::make('pessoal.email_profissional')->label('Email Profissional')->getStateUsing(fn(Curriculum $r)=>$r->pessoal['email_profissional']??null)->wrap(),
@@ -443,7 +443,7 @@ class CurriculumResource extends Resource
                 SelectFilter::make('status')->options([
                     'pendente'=>'Pendente',
                     'aprovado'=>'Aprovado',
-                    'reprovado'=>'Reprovado',
+                    'rejeitado'=>'Rejeitado',
                 ]),
             ])
             ->actions([

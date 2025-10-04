@@ -108,7 +108,7 @@
                             </div>
                             <div class="follow-count">
                                 <span>8,045</span>
-                                <p>Fans</p>
+                                <p>MASCULINO</p>
                             </div>
                         </div>
                         <div class="follow-us d-flex align-items-center">
@@ -117,7 +117,7 @@
                             </div>
                             <div class="follow-count">
                                 <span>8,045</span>
-                                <p>Fans</p>
+                                <p>FEMININO</p>
                             </div>
                         </div>
                         <div class="follow-us d-flex align-items-center">
@@ -126,7 +126,7 @@
                             </div>
                             <div class="follow-count">
                                 <span>8,045</span>
-                                <p>Fans</p>
+                                <p>COM ORCID</p>
                             </div>
                         </div>
                         <div class="follow-us d-flex align-items-center">
@@ -135,7 +135,7 @@
                             </div>
                             <div class="follow-count">
                                 <span>8,045</span>
-                                <p>Fans</p>
+                                <p>SEM ORCID</p>
                             </div>
                         </div>
                     </div>

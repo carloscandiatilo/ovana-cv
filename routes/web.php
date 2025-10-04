@@ -91,8 +91,8 @@ Route::get('/contacto', function () {
 
 
 // Página de teste
-Route::get('/curriculum', [CvPublicController::class, 'index']);
-Route::get('/candidatos/{id}', [CvPublicController::class, 'show'])->name('candidatos.show');
+Route::get('/curriculums', [CvPublicController::class, 'index']);
+Route::get('/curriculum/{id}', [CvPublicController::class, 'show'])->name('curriculum.show');
 
 
 // Página de notícia individual
@@ -112,7 +112,7 @@ Route::get('/weather', function () {
     if ($response->successful()) {
         $data = $response->json();
         return response()->json([
-            'city' => 'Luanda',
+            'city' => 'Cidade',
             'temp' => $data['current_weather']['temperature'] ?? null,
         ]);
     }

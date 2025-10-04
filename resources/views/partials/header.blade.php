@@ -14,7 +14,7 @@
                             </div>
                             <div class="header-info-right">
                                 <ul class="header-date">
-                                    <li><span class="flaticon-calendar"></span> +244 999 999 999</li>
+                                    <li><span class="ti-tablet"></span> +244 999 999 999</li>
                                 </ul>
                             </div>
                         </div>
@@ -49,7 +49,7 @@
                                     <ul id="navigation">
                                         <li><a href="{{ url('/') }}">Inicio</a></li>
                                         <li><a href="{{ url('/sobre') }}">Sobre</a></li>
-                                        <li><a href="{{ url('/curriculum') }}">Procurar Curriculum</a></li>
+                                        <li><a href="{{ url('/curriculums') }}">Procurar Curriculum</a></li>
                                         <li><a href="{{ url('/latest-news') }}">Estatisticas</a></li>
                                         <li><a href="{{ url('/contacto') }}">Contacto</a></li>
                                     </ul>

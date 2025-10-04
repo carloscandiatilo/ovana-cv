@@ -18,14 +18,14 @@
                                             >
                                             <div class="trend-top-cap">
                                                 <span class="bgr">{{ $news->category?->name ?? 'Sem categoria' }}</span>
-                                                <span class="badge bg-danger ms-2">Destaque</span>
+                                                <!-- <span class="badge bg-danger ms-2">Destaque</span> -->
                                                 <h2>
                                                     <a href="{{ route('news.show', $news->id) }}">
                                                         {{ Str::limit($news->title, 80) }}
                                                     </a>
                                                 </h2>
                                                 <p>
-                                                    by {{ $news->user?->name ?? 'Anônimo' }} 
+                                                    Por {{ $news->user?->name ?? 'Anônimo' }} 
                                                     - {{ $news->created_at->format('d M, Y') }}
                                                 </p>
                                             </div>
@@ -60,7 +60,7 @@
                                                     </a>
                                                 </h2>
                                                 <p>
-                                                    by {{ $news->user?->name ?? 'Anônimo' }} 
+                                                    Por {{ $news->user?->name ?? 'Anônimo' }} 
                                                     - {{ $news->created_at->format('d M, Y') }}
                                                 </p>
                                             </div>
@@ -82,7 +82,7 @@
                                             <div class="trend-top-cap trend-top-cap2">
                                                 <span class="bgr">Categoria</span>
                                                 <h2><a href="#">Notícia de destaque</a></h2>
-                                                <p>by Admin - {{ now()->format('d M, Y') }}</p>
+                                                <p>Por Admin - {{ now()->format('d M, Y') }}</p>
                                             </div>
                                         </div>
                                     </div>

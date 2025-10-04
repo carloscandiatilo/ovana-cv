@@ -69,7 +69,7 @@
                     </div>
                 </div>
 
-                <!-- Lista de Candidatos -->
+                <!-- Lista de curriculum -->
                 <div class="blog_left_sidebar">
                     <div class="row">
                         @forelse($curriculums as $cv)
@@ -100,7 +100,7 @@
                                     </div>
 
                                     <div class="blog_details p-3">
-                                        <a class="d-inline-block" href="{{ route('candidatos.show', $cv->id) }}">
+                                        <a class="d-inline-block" href="{{ route('curriculum.show', $cv->id) }}">
                                             <h4 class="mb-2">{{ $cv->pessoal['nome'] ?? 'Sem nome' }}</h4>
                                         </a>
                                         <p><i class="fa fa-user-graduate"></i> 
@@ -117,7 +117,7 @@
                                                 </a>
                                             </li>
                                             <li>
-                                                <a href="{{ route('candidatos.show', $cv->id) }}">
+                                                <a href="{{ route('curriculum.show', $cv->id) }}">
                                                     <i class="fa fa-envelope"></i> Ver Perfil
                                                 </a>
                                             </li>

@@ -39,7 +39,7 @@
         .then(response => response.json())
         .then(data => {
             if (data.temp) {
-                document.getElementById('weather').innerText = `O tempo hoje em ${data.city} | 🌡️ ${data.temp}°C`;
+                document.getElementById('weather').innerText = `Temperatura da tua ${data.city} hoje: 🌡️ ${data.temp}°C`;
             } else {
                 document.getElementById('weather').innerText = "Tempo indisponível";
             }

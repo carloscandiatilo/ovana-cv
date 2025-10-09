@@ -30,11 +30,30 @@
                                         <select name="provincia" class="form-select" id="provinciaSelect"
                                             style="border-radius: 8px; box-shadow: none; border: 1px solid #ddd;">
                                             <option value="">Todas</option>
-                                            @foreach(['Luanda', 'Benguela', 'Huíla', 'Cabinda', 'Namibe', 'Cuanza Sul', 'Bié', 'Zaire'] as $prov)
-                                                <option value="{{ $prov }}" @selected(request('provincia') == $prov)>
-                                                    {{ $prov }}
-                                                </option>
-                                            @endforeach
+                                                @foreach([
+                                                    'Bengo',
+                                                    'Benguela',
+                                                    'Bié',
+                                                    'Cabinda',
+                                                    'Cuando Cubango',
+                                                    'Cuanza Norte',
+                                                    'Cuanza Sul',
+                                                    'Cunene',
+                                                    'Huambo',
+                                                    'Huíla',
+                                                    'Luanda',
+                                                    'Lunda Norte',
+                                                    'Lunda Sul',
+                                                    'Malanje',
+                                                    'Moxico',
+                                                    'Namibe',
+                                                    'Uíge',
+                                                    'Zaire'
+                                                ] as $prov)
+                                                    <option value="{{ $prov }}" @selected(request('provincia') == $prov)>
+                                                        {{ $prov }}
+                                                    </option>
+                                                @endforeach
                                         </select>
                                     </div>
                                 </div>
@@ -45,7 +64,7 @@
                                         <select name="nivel" class="form-select" id="nivelSelect"
                                             style="border-radius: 8px; box-shadow: none; border: 1px solid #ddd;">
                                             <option value="">Todos</option>
-                                            @foreach(['Ensino Médio', 'Licenciatura', 'Mestrado', 'Doutoramento'] as $nivel)
+                                            @foreach(['Licenciatura', 'Mestrado', 'Doutoramento'] as $nivel)
                                                 <option value="{{ $nivel }}" @selected(request('nivel') == $nivel)>
                                                     {{ $nivel }}
                                                 </option>
@@ -74,7 +93,6 @@
                     <div class="row">
                         @forelse($curriculums as $cv)
                             @php
-                                // Garantir que experiências vem como array
                                 $experiencias = is_array($cv->experiencias_profissionais) 
                                     ? $cv->experiencias_profissionais 
                                     : (json_decode($cv->experiencias_profissionais, true) ?? []);
@@ -127,7 +145,7 @@
                             </div>
                         @empty
                             <div class="col-12 text-center py-5">
-                                <p class="text-muted">Nenhum candidato encontrado.</p>
+                                <p class="text-muted">Nenhum curriculum encontrado.</p>
                             </div>
                         @endforelse
                     </div>
@@ -149,7 +167,7 @@
                     <aside class="single_sidebar_widget post_category_widget">
                         <h4 class="widget_title">Níveis Acadêmicos</h4>
                         <ul class="list cat-list">
-                            @foreach(['Ensino Médio', 'Licenciatura', 'Mestrado', 'Doutoramento'] as $nivel)
+                            @foreach(['Licenciatura', 'Mestrado', 'Doutoramento'] as $nivel)
                                 <li>
                                     <a href="{{ request()->fullUrlWithQuery(['nivel' => $nivel, 'page' => 1]) }}" 
                                        class="d-flex justify-content-between">
@@ -164,15 +182,35 @@
                     <!-- Províncias -->
                     <aside class="single_sidebar_widget tag_cloud_widget">
                         <h4 class="widget_title">Províncias</h4>
-                        <ul class="list">
-                            @foreach(['Luanda', 'Benguela', 'Huíla', 'Cabinda', 'Namibe', 'Cuanza Sul', 'Bié', 'Zaire'] as $prov)
-                                <li>
-                                    <a href="{{ request()->fullUrlWithQuery(['provincia' => $prov, 'page' => 1]) }}">
-                                        {{ $prov }}
-                                    </a>
-                                </li>
-                            @endforeach
-                        </ul>
+                      <ul class="list">
+                        @foreach([
+                            'Bengo',
+                            'Benguela',
+                            'Bié',
+                            'Cabinda',
+                            'Cuando Cubango',
+                            'Cuanza Norte',
+                            'Cuanza Sul',
+                            'Cunene',
+                            'Huambo',
+                            'Huíla',
+                            'Luanda',
+                            'Lunda Norte',
+                            'Lunda Sul',
+                            'Malanje',
+                            'Moxico',
+                            'Namibe',
+                            'Uíge',
+                            'Zaire'
+                        ] as $prov)
+                            <li>
+                                <a href="{{ request()->fullUrlWithQuery(['provincia' => $prov, 'page' => 1]) }}">
+                                    {{ $prov }}
+                                </a>
+                            </li>
+                        @endforeach
+                    </ul>
+
                     </aside>
 
                     <!-- Solicitar contacto -->

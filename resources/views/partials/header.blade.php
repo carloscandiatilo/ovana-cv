@@ -50,7 +50,7 @@
                                         <li><a href="{{ url('/') }}">Inicio</a></li>
                                         <li><a href="{{ url('/sobre') }}">Sobre</a></li>
                                         <li><a href="{{ url('/curriculums') }}">Procurar Curriculum</a></li>
-                                        <li><a href="{{ url('/latest-news') }}">Estatisticas</a></li>
+                                        <!-- <li><a href="{{ url('/latest-news') }}">Estatisticas</a></li> -->
                                         <li><a href="{{ url('/contacto') }}">Contacto</a></li>
                                     </ul>
                                 </nav>
@@ -65,7 +65,10 @@
                                     <li><a href="#"><i class="fab fa-youtube"></i></a></li>
                                 </ul>
                                 <div class="nav-search search-switch">
-                                    <a href="{{ url('/admin/login') }}">
+                                    <!-- <a href="{{ url('/admin/login') }}">
+                                        <i class="fa fa-lock"></i>
+                                    </a> -->
+                                    <a href="{{ url('/register') }}">
                                         <i class="fa fa-lock"></i>
                                     </a>
                                 </div>

@@ -5,7 +5,7 @@
             <div class="row">
                 <div class="col-lg-3">
                     <div class="home-banner2 d-none d-lg-block">
-                        <img src="{{ asset('assets/img/gallery/body_card2.png') }}" alt="">
+                        <img src="{{ asset('assets/img/gallery/studante.jpg') }}" alt="">
                     </div>
                 </div>
                 <div class="col-lg-9">

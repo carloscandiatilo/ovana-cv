@@ -99,81 +99,88 @@
             </div>
 
 
-            <div class="col-lg-4">
-                <div class="single-follow mb-45">
-                    <div class="single-box">
-                        <div class="follow-us d-flex align-items-center">
-                            <div class="follow-social">
-                                <a href="#"><img src="{{ asset('assets/img/news/icon-fb.png') }}" alt=""></a>
-                            </div>
-                            <div class="follow-count">
-                                <span>8,045</span>
-                                <p>MASCULINO</p>
-                            </div>
-                        </div>
-                        <div class="follow-us d-flex align-items-center">
-                            <div class="follow-social">
-                                <a href="#"><img src="{{ asset('assets/img/news/icon-tw.png') }}" alt=""></a>
-                            </div>
-                            <div class="follow-count">
-                                <span>8,045</span>
-                                <p>FEMININO</p>
-                            </div>
-                        </div>
-                        <div class="follow-us d-flex align-items-center">
-                            <div class="follow-social">
-                                <a href="#"><img src="{{ asset('assets/img/news/icon-ins.png') }}" alt=""></a>
-                            </div>
-                            <div class="follow-count">
-                                <span>8,045</span>
-                                <p>COM ORCID</p>
-                            </div>
-                        </div>
-                        <div class="follow-us d-flex align-items-center">
-                            <div class="follow-social">
-                                <a href="#"><img src="{{ asset('assets/img/news/icon-yo.png') }}" alt=""></a>
-                            </div>
-                            <div class="follow-count">
-                                <span>8,045</span>
-                                <p>SEM ORCID</p>
-                            </div>
-                        </div>
-                    </div>
+           <div class="col-lg-4">
+    <!-- Estatísticas de utilizadores -->
+    <div class="single-follow mb-45">
+        <div class="single-box">
+            <div class="follow-us d-flex align-items-center">
+                <div class="follow-social text-center">
+                    <i class="fa fa-user fa-2x text-primary"></i>
                 </div>
-                <div class="most-recent-area">
-                    <div class="small-tittle mb-20">
-                        <h4>Acesso Rápido</h4>
-                    </div>
-                    <div class="most-recent mb-40">
-                        <div class="most-recent-img">
-                            <img src="{{ asset('assets/img/gallery/most_recent.png') }}" alt="">
-                            <div class="most-recent-cap">
-                                <span class="bgbeg">Vogue</span>
-                                <h4><a href="{{ url('/latest-news') }}">What to Wear: 9+ Cute Work <br> Outfits to Wear This.</a></h4>
-                                <p>Jhon  |  2 hours ago</p>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="most-recent-single">
-                        <div class="most-recent-images">
-                            <img src="{{ asset('assets/img/gallery/most_recent1.png') }}" alt="">
-                        </div>
-                        <div class="most-recent-capt">
-                            <h4><a href="{{ url('/latest-news') }}">Scarlett’s disappointment at latest accolade</a></h4>
-                            <p>Jhon  |  2 hours ago</p>
-                        </div>
-                    </div>
-                    <div class="most-recent-single">
-                        <div class="most-recent-images">
-                            <img src="{{ asset('assets/img/gallery/most_recent2.png') }}" alt="">
-                        </div>
-                        <div class="most-recent-capt">
-                            <h4><a href="{{ url('/latest-news') }}">Most Beautiful Things to Do in Sidney with Your BF</a></h4>
-                            <p>Jhon  |  3 hours ago</p>
-                        </div>
-                    </div>
+                <div class="follow-count">
+                    <span>00</span>
+                    <p>MASCULINO</p>
                 </div>
             </div>
+            <div class="follow-us d-flex align-items-center">
+                <div class="follow-social text-center">
+                    <i class="fa fa-user fa-2x text-danger"></i>
+                </div>
+                <div class="follow-count">
+                    <span>00</span>
+                    <p>FEMININO</p>
+                </div>
+            </div>
+            <div class="follow-us d-flex align-items-center">
+                <div class="follow-social text-center">
+                    <i class="fa fa-id-badge fa-2x text-success"></i>
+                </div>
+                <div class="follow-count">
+                    <span>00</span>
+                    <p>COM ORCID</p>
+                </div>
+            </div>
+            <div class="follow-us d-flex align-items-center">
+                <div class="follow-social text-center">
+                    <i class="fa fa-id-badge fa-2x text-muted"></i>
+                </div>
+                <div class="follow-count">
+                    <span>00</span>
+                    <p>SEM ORCID</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Acesso rápido com formulário -->
+    <div class="most-recent-area">
+        <div class="small-tittle mb-20">
+            <h4>Acesso Rápido</h4>
+        </div>
+
+        <div class="card p-3 shadow-sm">
+            <form action="{{ url('/search-cv') }}" method="GET">
+                <div class="form-group mb-3">
+                    <label for="nome">Nome</label>
+                    <input type="text" name="nome" id="nome" class="form-control" placeholder="Ex: Digite o Nome que procura">
+                </div>
+
+           
+
+                <div class="form-group mb-3">
+                    <label for="nivel_academico">Nível Acadêmico</label>
+                    <select name="nivel_academico" id="nivel_academico" class="form-select">
+                        <option value="">-- Selecione --</option>
+                        <option value="Licenciatura">Licenciatura</option>
+                        <option value="Pos-Graduacao">Pós-Graduação</option>
+                        <option value="Mestrado">Mestrado</option>
+                        <option value="Doutorado">Doutorado</option>
+                    </select>
+                </div>
+
+                <div class="form-group mb-3">
+                    <label for="localizacao">Localização</label>
+                    <input type="text" name="localizacao" id="localizacao" class="form-control" placeholder="Ex: Luanda, Benguela">
+                </div>
+
+                <div class="d-grid">
+                    <button type="submit" class="btn btn-primary btn-block">Pesquisar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
         </div>
     </div>
 </section>

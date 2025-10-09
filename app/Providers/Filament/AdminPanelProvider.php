@@ -28,6 +28,8 @@ class AdminPanelProvider extends PanelProvider
             ->id('admin')
             ->path('admin')
             ->login()
+            // ->logoutPath('/')
+            ->homeUrl('/') 
             ->sidebarCollapsibleOnDesktop()
             ->brandLogo(asset('images/logo-dark.jpg'))
            ->colors([

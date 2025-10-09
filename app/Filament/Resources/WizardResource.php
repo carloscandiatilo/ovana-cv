@@ -4,6 +4,7 @@ namespace App\Filament\Resources;
 
 use App\Filament\Resources\WizardResource\Pages;
 use App\Models\Curriculum;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Forms\Components\Wizard;
@@ -12,11 +13,11 @@ use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Str;
 
 class WizardResource extends Resource
 {
     protected static ?string $model = Curriculum::class;
-
     protected static ?string $navigationIcon = 'heroicon-o-document-text';
     protected static ?string $navigationGroup = 'Currículos';
     protected static ?string $label = 'Currículo';
@@ -26,17 +27,14 @@ class WizardResource extends Resource
     {
         return $form->schema([
             Wizard::make([
-                // Passo 1: Dados Pessoais
                 Forms\Components\Wizard\Step::make('Dados Pessoais')
                     ->icon('heroicon-o-user-circle')
                     ->schema(CurriculumResource::getFormSchema()),
 
-                // Passo 2: Dados de Ensino
                 Forms\Components\Wizard\Step::make('Dados de Ensino')
                     ->icon('heroicon-o-academic-cap')
                     ->schema(EnsinoResource::getFormSchema()),
 
-                // Passo 3: Investigação
                 Forms\Components\Wizard\Step::make('Investigação Científica')
                     ->icon('heroicon-o-magnifying-glass')
                     ->schema(\App\Filament\Resources\InvestigacaoResource::getFormSchema()),
@@ -48,8 +46,6 @@ class WizardResource extends Resource
                 Forms\Components\Wizard\Step::make('Gestão')
                     ->icon('heroicon-o-briefcase')
                     ->schema(\App\Filament\Resources\GestaoResource::getFormSchema()),
-
-
             ])
             ->skippable(true)
             ->columnSpanFull(),
@@ -71,24 +67,27 @@ class WizardResource extends Resource
                     ->badge()
                     ->color(fn (string $state): string => match ($state) {
                         'aprovado' => 'success',
-                        'reprovado' => 'danger',
+                        'rejeitado' => 'danger',
                         default     => 'warning',
                     }),
             ])
             ->actions([
                 Tables\Actions\ViewAction::make(),
+
                 Tables\Actions\EditAction::make()
                     ->visible(fn (Curriculum $record) =>
                         ! Auth::user()->can('visualizar_qualquer_curriculum') &&
                         $record->user_id === Auth::id()
                     ),
+
                 Tables\Actions\DeleteAction::make()
                     ->visible(fn () => Auth::user()->can('visualizar_qualquer_curriculum')),
+
                 Tables\Actions\Action::make('validar')
                     ->label('Validar')
                     ->icon('heroicon-o-check-circle')
                     ->modalHeading('Validar Currículo')
-                    ->modalDescription('Escolha se deseja aprovar ou reprovar este currículo.')
+                    ->modalDescription('Escolha se deseja aprovar ou Rejeitar este currículo.')
                     ->modalSubmitActionLabel('Confirmar')
                     ->modalWidth('sm')
                     ->form([
@@ -96,14 +95,66 @@ class WizardResource extends Resource
                             ->label('Estado')
                             ->options([
                                 'aprovado' => 'Aprovar',
-                                'reprovado' => 'Reprovar',
+                                'rejeitado' => 'Rejeitar',
                             ])
                             ->required(),
                     ])
                     ->action(fn (Curriculum $record, array $data) => $record->update(['status' => $data['status']]))
                     ->visible(fn (Curriculum $record) =>
                         Auth::user()->can('visualizar_qualquer_curriculum') &&
-                        in_array($record->status, ['pendente', 'reprovado'])
+                        in_array($record->status, ['pendente', 'rejeitado'])
+                    ),
+
+                Tables\Actions\Action::make('exportar_pdf')
+                    ->label('Baixar CV')
+                    ->icon('heroicon-o-document-arrow-down')
+                    ->color('info')
+                    ->action(function (Curriculum $record) {
+                        // Carregar TODOS os relacionamentos de todas as etapas
+                        $curriculum = $record->load([
+                            // Dados Pessoais já está no modelo principal
+
+                            // Ensino
+                            'material_pedagogicos',
+                            'orientacao_estudantes',
+                            'responsabilidade_orientacoes',
+                            'leccionacoes',
+                            'infraestrutura_ensinos',
+
+                            // Investigação
+                            'producaocientificas',
+                            'producaotecnologicas',
+                            'projectoinvestigacaos',
+                            'infraestruturasinvestigacaos',
+                            'reconhecimentocomunidadecientificos',
+
+                            // Extensão
+                            'producaonormativas',
+                            'prestacaoservicos',
+                            'interaccoescomunidade',
+                            'mobilizacoesagente',
+
+                            // Gestão
+                            'cargounidadeorganicas',
+                            'cargonivelunidades',
+                            'cargotarefastemporarias',
+                            'cargoorgaosexternos',
+                        ]);
+
+                        $nome = Str::slug($curriculum->pessoal['nome'] ?? 'curriculo', '_');
+                        $filename = "curriculo_{$nome}.pdf";
+
+                        $pdf = Pdf::loadView('curriculums.pdf', compact('curriculum'));
+
+                        return response()->streamDownload(
+                            fn () => print($pdf->output()),
+                            $filename,
+                            ['Content-Type' => 'application/pdf']
+                        );
+                    })
+                    ->visible(fn (Curriculum $record) =>
+                        Auth::user()->can('visualizar_qualquer_curriculum') ||
+                        $record->user_id === Auth::id()
                     ),
             ])
             ->filters([
@@ -112,7 +163,7 @@ class WizardResource extends Resource
                     ->options([
                         'pendente'  => 'Pendente',
                         'aprovado'  => 'Aprovado',
-                        'reprovado' => 'Reprovado',
+                        'rejeitado' => 'rejeitado',
                     ]),
             ])
             ->searchable();

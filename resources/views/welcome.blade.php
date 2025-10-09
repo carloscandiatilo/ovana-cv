@@ -11,8 +11,7 @@
                 <!-- Formulário de pesquisa -->
                 <div class="card shadow-sm mb-4 border-0" style="border-radius: 12px; background-color: #fff;">
                     <div class="card-body p-3">
-                        <!-- <form method="GET" action="{{ url('/') }}"> -->
-                            <form id="filterForm" method="GET" action="{{ route('cv.index') }}">
+                        <form method="GET" action="{{ url('/') }}">
                             <div class="row g-2 align-items-center">
 
                                 <!-- Nome -->
@@ -74,25 +73,15 @@
                                     </div>
                                 </div>
 
-                         
-                                <!-- Botões de Ação -->
-                                <div class="col-12 col-md-1 d-flex justify-content-end align-items-center gap-2">
-                                    <button type="submit"
-                                            class="btn btn-sm shadow-sm"
-                                            style="background-color: #0d6efd; color: white; border-radius: 8px; padding: 0.5rem 0.75rem; font-size: 0.9rem; mr-1"
-                                            title="Pesquisar">
-                                        <i class="fa fa-search"></i>
-                                    </button>
-
-                                    <!-- Botão Limpar -->
+                                <!-- Botão Limpar -->
+                                <div class="col-12 col-md-1 d-flex justify-content-end align-items-center">
                                     <a href="{{ url('/') }}" 
-                                    class="btn btn-sm shadow-sm"
-                                    style="background-color: #dc3545; color: white; border-radius: 8px; padding: 0.5rem 0.75rem; font-size: 0.9rem;"
-                                    title="Limpar">
+                                       class="btn btn-sm shadow-sm" 
+                                       style="background-color: #dc3545; color: white; border-radius: 8px; padding: 0.5rem 0.75rem; font-size: 0.9rem;"
+                                       title="Limpar">
                                         <i class="fa fa-times"></i>
                                     </a>
                                 </div>
-
 
                             </div>
                         </form>
@@ -143,7 +132,7 @@
                                             </li>
                                             <li>
                                                 <a href="{{ route('curriculum.show', $cv->id) }}">
-                                                    <i class="fa fa-eye"></i> Ver Perfil
+                                                    <i class="fa fa-envelope"></i> Ver Perfil
                                                 </a>
                                             </li>
                                         </ul>

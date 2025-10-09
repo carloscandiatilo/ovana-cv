@@ -1,5 +1,4 @@
 <?php
-
 namespace App\Http\Controllers;
 
 use App\Models\Curriculum;
@@ -12,105 +11,84 @@ class CvPublicController extends Controller
     {
         $query = Curriculum::aprovado()->with('user');
 
+        // 🔍 Filtro por nome
         if ($request->filled('nome')) {
             $query->whereRaw("LOWER(JSON_UNQUOTE(JSON_EXTRACT(pessoal, '$.nome'))) LIKE ?", [
                 '%' . strtolower($request->nome) . '%'
             ]);
         }
 
-        if ($request->filled('pais')) {
-            $query->whereRaw("JSON_UNQUOTE(JSON_EXTRACT(pessoal, '$.endereco_pais')) = ?", [
-                $request->pais
+        // 📍 Filtro por província
+        if ($request->filled('provincia')) {
+            $query->whereRaw("JSON_UNQUOTE(JSON_EXTRACT(pessoal, '$.endereco_provincia')) = ?", [
+                $request->provincia
             ]);
         }
 
-        if ($request->filled('grau')) {
+        // 🎓 Filtro por nível (grau acadêmico)
+        if ($request->filled('nivel')) {
             $query->whereRaw("JSON_CONTAINS(formacoes_academicas, ?)", [
-                json_encode(['grau_academico' => $request->grau])
+                json_encode(['grau_academico' => $request->nivel])
             ]);
         }
 
+        // Paginação com query string mantida
         $curriculums = $query->paginate(12)->withQueryString();
 
-        $paises = Curriculum::aprovado()
-            ->selectRaw("DISTINCT JSON_UNQUOTE(JSON_EXTRACT(pessoal, '$.endereco_pais')) as pais")
-            ->whereRaw("JSON_UNQUOTE(JSON_EXTRACT(pessoal, '$.endereco_pais')) IS NOT NULL")
-            ->pluck('pais')
-            ->filter()
-            ->sort()
-            ->values()
-            ->toArray();
+        // (opcional) Estatísticas de níveis para a sidebar
+        $contagensNiveis = [
+            'Licenciatura' => Curriculum::aprovado()->whereRaw("JSON_CONTAINS(formacoes_academicas, ?)", [json_encode(['grau_academico' => 'Licenciatura'])])->count(),
+            'Mestrado'     => Curriculum::aprovado()->whereRaw("JSON_CONTAINS(formacoes_academicas, ?)", [json_encode(['grau_academico' => 'Mestrado'])])->count(),
+            'Doutoramento' => Curriculum::aprovado()->whereRaw("JSON_CONTAINS(formacoes_academicas, ?)", [json_encode(['grau_academico' => 'Doutoramento'])])->count(),
+        ];
 
-        return view('welcome', compact('curriculums', 'paises'));
+        return view('welcome', compact('curriculums', 'contagensNiveis'));
     }
 
     public function show($id)
-{
-    // Carrega o currículo com todos os relacionamentos usados no PDF
-    $curriculum = Curriculum::aprovado()
-        ->with([
-            'user',
-            'idiomas',
-            'material_pedagogicos',
-            'orientacao_estudantes',
-            'responsabilidade_orientacoes',
-            'leccionacoes',
-            'infraestrutura_ensinos',
-            'producaocientificas',
-            'producaotecnologicas',
-            'projectoinvestigacaos',
-            'infraestruturasinvestigacaos',
-            'reconhecimentocomunidadecientificos',
-            'producaonormativas',
-            'prestacaoservicos',
-            'interaccoescomunidade',
-            'mobilizacoesagente',
-            'cargounidadeorganicas',
-            'cargonivelunidades',
-            'cargotarefastemporarias',
-            'cargoorgaosexternos',
-        ])
-        ->findOrFail($id);
+    {
+        $curriculum = Curriculum::aprovado()
+            ->with([
+                'user',
+                'idiomas',
+                'material_pedagogicos',
+                'orientacao_estudantes',
+                'responsabilidade_orientacoes',
+                'leccionacoes',
+                'infraestrutura_ensinos',
+                'producaocientificas',
+                'producaotecnologicas',
+                'projectoinvestigacaos',
+                'infraestruturasinvestigacaos',
+                'reconhecimentocomunidadecientificos',
+                'producaonormativas',
+                'prestacaoservicos',
+                'interaccoescomunidade',
+                'mobilizacoesagente',
+                'cargounidadeorganicas',
+                'cargonivelunidades',
+                'cargotarefastemporarias',
+                'cargoorgaosexternos',
+            ])
+            ->findOrFail($id);
 
-    // Função auxiliar para decodificar JSON com segurança
-    $decodeJson = function ($value) {
-        if (is_null($value)) return [];
-        if (is_array($value)) return $value;
-        if (is_string($value)) {
-            $decoded = json_decode($value, true);
-            return is_array($decoded) ? $decoded : [];
-        }
-        return [];
-    };
+        $decodeJson = fn($v) => is_array($v) ? $v : (json_decode($v, true) ?: []);
 
-    // Decodifica todos os campos JSON usados no PDF
-    $pessoal = $decodeJson($curriculum->pessoal);
-    $formacoes = $decodeJson($curriculum->formacoes_academicas);
-    $formacoes_complementares = $decodeJson($curriculum->formacoes_complementares);
-    $premios = $decodeJson($curriculum->premios);
-    $actuacoes_profissionais = $decodeJson($curriculum->actuacoes_profissionais);
-    $actuacoes_docencias = $decodeJson($curriculum->actuacoes_docencias);
-    $investigacoes_cientificas = $decodeJson($curriculum->investigacoes_cientificas);
-    $extensoes_universitarias = $decodeJson($curriculum->extensoes_universitarias);
-    $captacoes_financiamentos = $decodeJson($curriculum->captacoes_financiamentos);
-    $competencias = $decodeJson($curriculum->competencias);
-    $experiencias = $decodeJson($curriculum->experiencias_profissionais); // já usado
-
-    return view('curriculums.show', compact(
-        'curriculum',
-        'pessoal',
-        'formacoes',
-        'formacoes_complementares',
-        'premios',
-        'actuacoes_profissionais',
-        'actuacoes_docencias',
-        'investigacoes_cientificas',
-        'extensoes_universitarias',
-        'captacoes_financiamentos',
-        'competencias',
-        'experiencias'
-    ));
-}
+        return view('curriculums.show', [
+            'curriculum' => $curriculum,
+            'pessoal' => $decodeJson($curriculum->pessoal),
+            'formacoes' => $decodeJson($curriculum->formacoes_academicas),
+            'formacoes_complementares' => $decodeJson($curriculum->formacoes_complementares),
+            'premios' => $decodeJson($curriculum->premios),
+            'actuacoes_profissionais' => $decodeJson($curriculum->actuacoes_profissionais),
+            'actuacoes_docencias' => $decodeJson($curriculum->actuacoes_docencias),
+            'investigacoes_cientificas' => $decodeJson($curriculum->investigacoes_cientificas),
+            'extensoes_universitarias' => $decodeJson($curriculum->extensoes_universitarias),
+            'captacoes_financiamentos' => $decodeJson($curriculum->captacoes_financiamentos),
+            'competencias' => $decodeJson($curriculum->competencias),
+            'experiencias' => $decodeJson($curriculum->experiencias_profissionais),
+        ]);
+    }
 
     public function download($id)
     {

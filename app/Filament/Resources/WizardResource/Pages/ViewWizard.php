@@ -18,7 +18,7 @@ class ViewWizard extends ViewRecord
         return [
             Actions\EditAction::make()
                 ->visible(fn (Curriculum $record) =>
-                    in_array($record->status, ['pendente', 'reprovado'])
+                    in_array($record->status, ['pendente', 'rejeitado'])
                 ),
 
             Actions\DeleteAction::make()
@@ -29,7 +29,7 @@ class ViewWizard extends ViewRecord
                 ->icon('heroicon-o-check-circle')
                 ->color('primary')
                 ->modalHeading('Validar Currículo')
-                ->modalDescription('Escolha se deseja aprovar ou reprovar este currículo.')
+                ->modalDescription('Escolha se deseja aprovar ou Rejeitar este currículo.')
                 ->modalSubmitActionLabel('Confirmar')
                 ->modalWidth('sm')
                 ->form([
@@ -37,7 +37,7 @@ class ViewWizard extends ViewRecord
                         ->label('Estado')
                         ->options([
                             'aprovado' => 'Aprovar',
-                            'reprovado' => 'Reprovar',
+                            'rejeitado' => 'Rejeitar',
                         ])
                         ->required(),
                 ])
@@ -45,7 +45,7 @@ class ViewWizard extends ViewRecord
                     $record->update(['status' => $data['status']]);
                 })
                 ->visible(fn (Curriculum $record) =>
-                    in_array($record->status, ['pendente', 'reprovado']) &&
+                    in_array($record->status, ['pendente', 'rejeitado']) &&
                     Auth::user()->can('validar_curriculum')
                 ),
         ];
